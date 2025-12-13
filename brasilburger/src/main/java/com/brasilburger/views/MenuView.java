@@ -39,7 +39,7 @@ public class MenuView {
                 case 1 -> ajouterMenu();
                 case 2 -> listerMenus();
                 case 3 -> modifierMenu();
-                //case 4 -> archiverMenu();
+                case 4 -> archiverMenu();
                 case 0 -> {
                     return;
                 }
@@ -224,6 +224,35 @@ public class MenuView {
             }
         } else {
             InputHelper.afficherInfo("Modification annulée.");
+        }
+
+        InputHelper.pause();
+    }
+        private void archiverMenu() {
+        InputHelper.clearConsole();
+        InputHelper.afficherSeparateur("ARCHIVER UN MENU");
+
+        int id = InputHelper.lireEntierPositif("ID du menu à archiver : ");
+
+        Menu menu = menuService.findByIdWithComposition(id);
+        if (menu == null) {
+            InputHelper.pause();
+            return;
+        }
+
+        System.out.println("\n📋 MENU À ARCHIVER :");
+        System.out.println(menu.toDetailedString());
+
+        if (menu.isArchive()) {
+            InputHelper.afficherInfo("Ce menu est déjà archivé.");
+            InputHelper.pause();
+            return;
+        }
+
+        if (InputHelper.confirmer("\nConfirmer l'archivage ?")) {
+            menuService.archive(id);
+        } else {
+            InputHelper.afficherInfo("Archivage annulé.");
         }
 
         InputHelper.pause();

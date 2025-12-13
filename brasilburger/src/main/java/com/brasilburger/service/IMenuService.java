@@ -17,5 +17,6 @@ public interface IMenuService {
 
     List<Menu> findAllWithComposition();
     Menu update(Menu menu);
+    boolean archive(Integer id);
 
 }

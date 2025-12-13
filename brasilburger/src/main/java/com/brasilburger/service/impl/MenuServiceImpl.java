@@ -108,6 +108,19 @@ public class MenuServiceImpl implements IMenuService {
         }
         return menus;
     }
+    @Override
+    public boolean archive(Integer id) {
+        if (!ValidationHelper.isValidId(id)) {
+            return false;
+        }
+
+        Menu menu = menuRepository.findById(id);
+        if (menu == null || menu.isArchive()) {
+            return false;
+        }
+
+        return menuRepository.archive(id);
+    }
  
 
 }

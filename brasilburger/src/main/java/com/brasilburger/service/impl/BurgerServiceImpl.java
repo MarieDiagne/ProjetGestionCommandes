@@ -80,4 +80,18 @@ public class BurgerServiceImpl implements IBurgerService {
     public List<Burger> findAllNonArchived() {
         return burgerRepository.findAllNonArchived();
     }
+        @Override
+    public Burger update(Burger burger) {
+        if (!ValidationHelper.isValidId(burger.getId())) {
+            return null;
+        }
+
+        if (!validateBurger(burger)) {
+            return null;
+        }
+
+        cleanBurger(burger);
+        return burgerRepository.update(burger);
+    }
+
 }

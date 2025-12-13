@@ -31,7 +31,7 @@ public class BurgerView {
             switch (choix) {
                 case 1 -> ajouterBurger();
                 case 2 -> listerBurgers();
-                // case 3 -> modifierBurger();
+                case 3 -> modifierBurger();
                 // case 4 -> archiverBurger();
                 case 0 -> {
                     return;
@@ -127,6 +127,70 @@ public class BurgerView {
                 System.out.println(burger.toDetailedString());
                 InputHelper.pause();
             }
+        }
+
+        InputHelper.pause();
+    }
+
+    private void modifierBurger() {
+        InputHelper.clearConsole();
+        InputHelper.afficherSeparateur("MODIFIER UN BURGER");
+
+        int id = InputHelper.lireEntierPositif("ID du burger à modifier : ");
+
+        Burger burger = burgerService.findById(id);
+        if (burger == null) {
+            InputHelper.pause();
+            return;
+        }
+
+        System.out.println("\n📋 BURGER ACTUEL :");
+        System.out.println(burger.toDetailedString());
+
+        System.out.println("\n📝 NOUVELLE INFORMATIONS (Entrée pour garder l'actuel) :");
+
+        System.out.print("Nom [" + burger.getNom() + "] : ");
+        String nom = InputHelper.lireString();
+        if (nom.isEmpty()) {
+            nom = burger.getNom();
+        }
+
+        System.out
+                .print("Description [" + (burger.getDescription() != null ? burger.getDescription() : "N/A") + "] : ");
+        String description = InputHelper.lireString();
+        if (description.isEmpty()) {
+            description = burger.getDescription();
+        }
+
+        System.out.print("Prix [" + burger.getPrix() + " FCFA] (0 pour garder) : ");
+        String prixStr = InputHelper.lireString();
+        BigDecimal prix = burger.getPrix();
+        if (!prixStr.isEmpty()) {
+            try {
+                prix = new BigDecimal(prixStr.replace(',', '.'));
+            } catch (NumberFormatException e) {
+                InputHelper.afficherErreur("Prix invalide, valeur actuelle conservée.");
+            }
+        }
+
+        System.out.print("URL Image [" + (burger.hasImage() ? "Définie" : "N/A") + "] : ");
+        String image = InputHelper.lireString();
+        if (image.isEmpty()) {
+            image = burger.getImage();
+        }
+
+        burger.setNom(nom);
+        burger.setDescription(description);
+        burger.setPrix(prix);
+        burger.setImage(image);
+
+        if (InputHelper.confirmer("\nConfirmer les modifications ?")) {
+            Burger updated = burgerService.update(burger);
+            if (updated != null) {
+                System.out.println("\n" + updated.toDetailedString());
+            }
+        } else {
+            InputHelper.afficherInfo("Modification annulée.");
         }
 
         InputHelper.pause();

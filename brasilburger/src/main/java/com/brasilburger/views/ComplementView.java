@@ -32,7 +32,7 @@ public class ComplementView {
             switch (choix) {
                 case 1 -> ajouterComplement();
                 case 2 -> listerComplements();
-                // case 3 -> modifierComplement();
+                case 3 -> modifierComplement();
                 // case 4 -> archiverComplement();
                 case 0 -> {
                     return;
@@ -141,6 +141,75 @@ public class ComplementView {
                 System.out.println(complement.toDetailedString());
                 InputHelper.pause();
             }
+        }
+
+        InputHelper.pause();
+    }
+
+    private void modifierComplement() {
+        InputHelper.clearConsole();
+        InputHelper.afficherSeparateur("MODIFIER UN COMPLÉMENT");
+
+        int id = InputHelper.lireEntierPositif("ID du complément à modifier : ");
+
+        Complement complement = complementService.findById(id);
+        if (complement == null) {
+            InputHelper.pause();
+            return;
+        }
+
+        System.out.println("\n📋 COMPLÉMENT ACTUEL :");
+        System.out.println(complement.toDetailedString());
+
+        System.out.println("\n📝 NOUVELLES INFORMATIONS (Entrée pour garder l'actuel) :");
+
+        System.out.print("Nom [" + complement.getNom() + "] : ");
+        String nom = InputHelper.lireString();
+        if (nom.isEmpty()) {
+            nom = complement.getNom();
+        }
+
+        System.out.println("\nType de complément [" + complement.getType().getValue() + "] :");
+        System.out.println("1. 🥤 Boisson");
+        System.out.println("2. 🍟 Frites");
+        System.out.println("0. Garder l'actuel");
+        int typeChoix = InputHelper.lireEntier("Votre choix : ", 0, 2);
+        TypeComplementEnum type = complement.getType();
+        if (typeChoix == 1) {
+            type = TypeComplementEnum.BOISSON;
+        } else if (typeChoix == 2) {
+            type = TypeComplementEnum.FRITES;
+        }
+
+        System.out.print("Prix [" + complement.getPrix() + " FCFA] (0 pour garder) : ");
+        String prixStr = InputHelper.lireString();
+        BigDecimal prix = complement.getPrix();
+        if (!prixStr.isEmpty()) {
+            try {
+                prix = new BigDecimal(prixStr.replace(',', '.'));
+            } catch (NumberFormatException e) {
+                InputHelper.afficherErreur("Prix invalide, valeur actuelle conservée.");
+            }
+        }
+
+        System.out.print("URL Image [" + (complement.hasImage() ? "Définie" : "N/A") + "] : ");
+        String image = InputHelper.lireString();
+        if (image.isEmpty()) {
+            image = complement.getImage();
+        }
+
+        complement.setNom(nom);
+        complement.setType(type);
+        complement.setPrix(prix);
+        complement.setImage(image);
+
+        if (InputHelper.confirmer("\nConfirmer les modifications ?")) {
+            Complement updated = complementService.update(complement);
+            if (updated != null) {
+                System.out.println("\n" + updated.toDetailedString());
+            }
+        } else {
+            InputHelper.afficherInfo("Modification annulée.");
         }
 
         InputHelper.pause();

@@ -97,7 +97,7 @@ public class ComplementServiceImpl implements IComplementService {
         }
         return complementRepository.findByTypeNonArchived(type);
     }
-        @Override
+    @Override
     public Complement update(Complement complement) {
         if (!ValidationHelper.isValidId(complement.getId())) {
             System.err.println("❌ ID du complément invalide.");

@@ -31,7 +31,7 @@ public class ComplementView {
 
             switch (choix) {
                 case 1 -> ajouterComplement();
-                // case 2 -> listerComplements();
+                case 2 -> listerComplements();
                 // case 3 -> modifierComplement();
                 // case 4 -> archiverComplement();
                 case 0 -> {
@@ -76,6 +76,71 @@ public class ComplementView {
             }
         } else {
             InputHelper.afficherInfo("Création annulée.");
+        }
+
+        InputHelper.pause();
+    }
+
+    private void listerComplements() {
+        InputHelper.clearConsole();
+        InputHelper.afficherSeparateur("LISTE DES COMPLÉMENTS");
+
+        System.out.println("1. Tous les compléments");
+        System.out.println("2. Compléments disponibles uniquement");
+        System.out.println("3. Boissons uniquement");
+        System.out.println("4. Frites uniquement");
+        System.out.println("0. Retour");
+        System.out.println("═══════════════════════════════════════════════════");
+
+        int choix = InputHelper.lireEntier("Votre choix : ", 0, 4);
+
+        List<Complement> complements;
+        String titre = "LISTE DES COMPLÉMENTS";
+
+        switch (choix) {
+            case 1 -> complements = complementService.findAll();
+            case 2 -> complements = complementService.findAllNonArchived();
+            case 3 -> {
+                complements = complementService.findByTypeNonArchived(TypeComplementEnum.BOISSON);
+                titre = "LISTE DES BOISSONS";
+            }
+            case 4 -> {
+                complements = complementService.findByTypeNonArchived(TypeComplementEnum.FRITES);
+                titre = "LISTE DES FRITES";
+            }
+            default -> {
+                return;
+            }
+        }
+
+        InputHelper.clearConsole();
+        InputHelper.afficherSeparateur(titre);
+
+        if (complements.isEmpty()) {
+            InputHelper.afficherInfo("Aucun complément trouvé.");
+        } else {
+            System.out.println("Total : " + complements.size() + " complément(s)\n");
+
+            for (int i = 0; i < complements.size(); i++) {
+                Complement c = complements.get(i);
+                System.out.printf("%d. [ID:%d] %s %s - %.2f FCFA %s%n",
+                        i + 1,
+                        c.getId(),
+                        c.getEmoji(),
+                        c.getNom(),
+                        c.getPrix(),
+                        c.isArchive() ? "❌ (Archivé)" : "✅");
+            }
+
+            System.out.println("\n═══════════════════════════════════════════════════");
+            System.out.print("Entrez un numéro pour voir les détails (0 pour quitter) : ");
+            int numero = InputHelper.lireEntier("", 0, complements.size());
+
+            if (numero > 0) {
+                Complement complement = complements.get(numero - 1);
+                System.out.println(complement.toDetailedString());
+                InputHelper.pause();
+            }
         }
 
         InputHelper.pause();

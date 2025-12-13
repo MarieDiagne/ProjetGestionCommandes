@@ -38,7 +38,7 @@ public class MenuView {
             switch (choix) {
                 case 1 -> ajouterMenu();
                 case 2 -> listerMenus();
-                //case 3 -> modifierMenu();
+                case 3 -> modifierMenu();
                 //case 4 -> archiverMenu();
                 case 0 -> {
                     return;
@@ -180,6 +180,50 @@ public class MenuView {
                 System.out.println(menu.toDetailedString());
                 InputHelper.pause();
             }
+        }
+
+        InputHelper.pause();
+    }
+
+        private void modifierMenu() {
+        InputHelper.clearConsole();
+        InputHelper.afficherSeparateur("MODIFIER UN MENU");
+
+        int id = InputHelper.lireEntierPositif("ID du menu à modifier : ");
+
+        Menu menu = menuService.findByIdWithComposition(id);
+        if (menu == null) {
+            InputHelper.pause();
+            return;
+        }
+
+        System.out.println("\n📋 MENU ACTUEL :");
+        System.out.println(menu.toDetailedString());
+
+        System.out.println("\n📝 NOUVELLES INFORMATIONS (Entrée pour garder l'actuel) :");
+
+        System.out.print("Nom [" + menu.getNom() + "] : ");
+        String nom = InputHelper.lireString();
+        if (nom.isEmpty()) {
+            nom = menu.getNom();
+        }
+
+        System.out.print("URL Image [" + (menu.hasImage() ? "Définie" : "N/A") + "] : ");
+        String image = InputHelper.lireString();
+        if (image.isEmpty()) {
+            image = menu.getImage();
+        }
+
+        menu.setNom(nom);
+        menu.setImage(image);
+
+        if (InputHelper.confirmer("\nConfirmer les modifications ?")) {
+            Menu updated = menuService.update(menu);
+            if (updated != null) {
+                System.out.println("\n" + updated.toDetailedString());
+            }
+        } else {
+            InputHelper.afficherInfo("Modification annulée.");
         }
 
         InputHelper.pause();

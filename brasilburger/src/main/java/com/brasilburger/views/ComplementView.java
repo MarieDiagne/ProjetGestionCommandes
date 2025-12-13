@@ -33,7 +33,7 @@ public class ComplementView {
                 case 1 -> ajouterComplement();
                 case 2 -> listerComplements();
                 case 3 -> modifierComplement();
-                // case 4 -> archiverComplement();
+                case 4 -> archiverComplement();
                 case 0 -> {
                     return;
                 }
@@ -210,6 +210,36 @@ public class ComplementView {
             }
         } else {
             InputHelper.afficherInfo("Modification annulée.");
+        }
+
+        InputHelper.pause();
+    }
+
+    private void archiverComplement() {
+        InputHelper.clearConsole();
+        InputHelper.afficherSeparateur("ARCHIVER UN COMPLÉMENT");
+
+        int id = InputHelper.lireEntierPositif("ID du complément à archiver : ");
+
+        Complement complement = complementService.findById(id);
+        if (complement == null) {
+            InputHelper.pause();
+            return;
+        }
+
+        System.out.println("\n📋 COMPLÉMENT À ARCHIVER :");
+        System.out.println(complement.toDetailedString());
+
+        if (complement.isArchive()) {
+            InputHelper.afficherInfo("Ce complément est déjà archivé.");
+            InputHelper.pause();
+            return;
+        }
+
+        if (InputHelper.confirmer("\nConfirmer l'archivage ?")) {
+            complementService.archive(id);
+        } else {
+            InputHelper.afficherInfo("Archivage annulé.");
         }
 
         InputHelper.pause();

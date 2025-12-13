@@ -122,6 +122,30 @@ public class ComplementServiceImpl implements IComplementService {
         }
         return updated;
     }
+        @Override
+    public boolean archive(Integer id) {
+        if (!ValidationHelper.isValidId(id)) {
+            System.err.println("❌ ID invalide.");
+            return false;
+        }
+
+        Complement complement = complementRepository.findById(id);
+        if (complement == null) {
+            System.err.println("❌ Complément introuvable (ID: " + id + ")");
+            return false;
+        }
+
+        if (complement.isArchive()) {
+            System.out.println("⚠️  Ce complément est déjà archivé.");
+            return true;
+        }
+
+        boolean archived = complementRepository.archive(id);
+        if (archived) {
+            System.out.println("✅ Complément archivé avec succès !");
+        }
+        return archived;
+    }
 
 
 }

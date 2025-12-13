@@ -12,6 +12,7 @@ public interface IComplementService {
     List<Complement> findByTypeNonArchived(TypeComplementEnum type);
     Complement update(Complement complement);
     Complement findById(Integer id);
+    boolean archive(Integer id);
     
     
 

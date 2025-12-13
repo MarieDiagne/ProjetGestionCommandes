@@ -63,4 +63,21 @@ public class BurgerServiceImpl implements IBurgerService {
         burger.setNom(ValidationHelper.cleanString(burger.getNom()));
         burger.setDescription(ValidationHelper.cleanString(burger.getDescription()));
     }
+        @Override
+    public Burger findById(Integer id) {
+        if (!ValidationHelper.isValidId(id)) {
+            return null;
+        }
+        return burgerRepository.findById(id);
+    }
+
+    @Override
+    public List<Burger> findAll() {
+        return burgerRepository.findAll();
+    }
+
+    @Override
+    public List<Burger> findAllNonArchived() {
+        return burgerRepository.findAllNonArchived();
+    }
 }

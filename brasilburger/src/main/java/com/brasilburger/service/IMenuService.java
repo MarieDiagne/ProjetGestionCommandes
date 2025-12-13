@@ -10,4 +10,11 @@ public interface IMenuService {
     Menu findById(Integer id);
 
     Menu findByIdWithComposition(Integer id);
+    
+    List<Menu> findAll();
+
+    List<Menu> findAllNonArchived();
+
+    List<Menu> findAllWithComposition();
+    Menu update(Menu menu);
 }

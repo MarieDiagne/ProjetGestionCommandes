@@ -2,12 +2,14 @@ package com.brasilburger.views;
 
 import com.brasilburger.enums.TypeComplementEnum;
 import com.brasilburger.model.Complement;
+import com.brasilburger.model.Composition;
 import com.brasilburger.model.Menu;
 import com.brasilburger.service.IComplementService;
 import com.brasilburger.service.IMenuService;
 import com.brasilburger.service.impl.ComplementServiceImpl;
 import com.brasilburger.service.impl.MenuServiceImpl;
 import com.brasilburger.utils.InputHelper;
+import com.brasilburger.utils.ValidationHelper;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -35,7 +37,7 @@ public class MenuView {
 
             switch (choix) {
                 case 1 -> ajouterMenu();
-                //case 2 -> listerMenus();
+                case 2 -> listerMenus();
                 //case 3 -> modifierMenu();
                 //case 4 -> archiverMenu();
                 case 0 -> {
@@ -108,4 +110,81 @@ public class MenuView {
         InputHelper.afficherSucces("✅ Menu créé avec succès avec tous les compléments obligatoires !");
         InputHelper.pause();
     }
+    
+    private void listerMenus() {
+        InputHelper.clearConsole();
+        InputHelper.afficherSeparateur("LISTE DES MENUS");
+
+        System.out.println("1. Tous les menus");
+        System.out.println("2. Menus disponibles uniquement");
+        System.out.println("3. Menus avec compositions");
+        System.out.println("0. Retour");
+        System.out.println("═══════════════════════════════════════════════════");
+
+        int choix = InputHelper.lireEntier("Votre choix : ", 0, 3);
+
+        List<Menu> menus;
+        boolean avecComposition = false;
+
+        switch (choix) {
+            case 1 -> menus = menuService.findAll();
+            case 2 -> menus = menuService.findAllNonArchived();
+            case 3 -> {
+                menus = menuService.findAllWithComposition();
+                avecComposition = true;
+            }
+            default -> {
+                return;
+            }
+        }
+
+        InputHelper.clearConsole();
+        InputHelper.afficherSeparateur("LISTE DES MENUS");
+
+        if (menus.isEmpty()) {
+            InputHelper.afficherInfo("Aucun menu trouvé.");
+        } else {
+            System.out.println("Total : " + menus.size() + " menu(s)\n");
+
+            for (int i = 0; i < menus.size(); i++) {
+                Menu m = menus.get(i);
+                String composition = m.hasComposition() ? "✅" : "❌";
+                String prix = m.getPrixCalcule() != null ? String.format("%.2f FCFA", m.getPrixCalcule()) : "N/A";
+
+                if (avecComposition) {
+                    System.out.printf("%d. [ID:%d] %s - %s %s%n",
+                            i + 1,
+                            m.getId(),
+                            m.getNom(),
+                            prix,
+                            m.isArchive() ? "❌ (Archivé)" : "");
+                } else {
+                    System.out.printf("%d. [ID:%d] %s - Composition: %s %s%n",
+                            i + 1,
+                            m.getId(),
+                            m.getNom(),
+                            composition,
+                            m.isArchive() ? "❌ (Archivé)" : "✅");
+                }
+            }
+
+            System.out.println("\n═══════════════════════════════════════════════════");
+            System.out.print("Entrez un numéro pour voir les détails (0 pour quitter) : ");
+            int numero = InputHelper.lireEntier("", 0, menus.size());
+
+            if (numero > 0) {
+                Menu menu = menus.get(numero - 1);
+                if (!avecComposition && menu.getId() != null) {
+                    menu = menuService.findByIdWithComposition(menu.getId());
+                }
+                System.out.println(menu.toDetailedString());
+                InputHelper.pause();
+            }
+        }
+
+        InputHelper.pause();
+    }
+
+
+
 }

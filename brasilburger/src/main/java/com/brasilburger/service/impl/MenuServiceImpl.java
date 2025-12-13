@@ -70,4 +70,43 @@ public class MenuServiceImpl implements IMenuService {
 
         return true;
     }
+
+    @Override
+    public Menu update(Menu menu) {
+        if (!ValidationHelper.isValidId(menu.getId())) {
+            return null;
+        }
+
+        if (!validateMenu(menu)) {
+            return null;
+        }
+
+        menu.setNom(ValidationHelper.cleanString(menu.getNom()));
+        return menuRepository.update(menu);
+    }
+
+    @Override
+    public List<Menu> findAll() {
+        return menuRepository.findAll();
+    }
+
+    @Override
+    public List<Menu> findAllNonArchived() {
+        return menuRepository.findAllNonArchived();
+    }
+
+    @Override
+    public List<Menu> findAllWithComposition() {
+        List<Menu> menus = menuRepository.findAll();
+
+        for (Menu menu : menus) {
+            Composition composition = compositionRepository.findByMenuId(menu.getId());
+            if (composition != null) {
+                menu.setComposition(composition);
+                menu.calculerPrix();
+            }
+        }
+        return menus;
+    }
+
 }

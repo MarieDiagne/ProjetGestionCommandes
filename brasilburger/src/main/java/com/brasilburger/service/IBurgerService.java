@@ -14,4 +14,6 @@ public interface IBurgerService {
     List<Burger> findAllNonArchived();
 
     Burger update(Burger burger);
+
+    boolean archive(Integer id);
 }

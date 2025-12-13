@@ -32,7 +32,7 @@ public class BurgerView {
                 case 1 -> ajouterBurger();
                 case 2 -> listerBurgers();
                 case 3 -> modifierBurger();
-                // case 4 -> archiverBurger();
+                case 4 -> archiverBurger();
                 case 0 -> {
                     return;
                 }
@@ -195,4 +195,35 @@ public class BurgerView {
 
         InputHelper.pause();
     }
+
+    private void archiverBurger() {
+        InputHelper.clearConsole();
+        InputHelper.afficherSeparateur("ARCHIVER UN BURGER");
+
+        int id = InputHelper.lireEntierPositif("ID du burger à archiver : ");
+
+        Burger burger = burgerService.findById(id);
+        if (burger == null) {
+            InputHelper.pause();
+            return;
+        }
+
+        System.out.println("\n📋 BURGER À ARCHIVER :");
+        System.out.println(burger.toDetailedString());
+
+        if (burger.isArchive()) {
+            InputHelper.afficherInfo("Ce burger est déjà archivé.");
+            InputHelper.pause();
+            return;
+        }
+
+        if (InputHelper.confirmer("\nConfirmer l'archivage ?")) {
+            burgerService.archive(id);
+        } else {
+            InputHelper.afficherInfo("Archivage annulé.");
+        }
+
+        InputHelper.pause();
+    }
+
 }

@@ -26,6 +26,7 @@ public class BurgerServiceImpl implements IBurgerService {
         cleanBurger(burger);
         return burgerRepository.create(burger);
     }
+
     private boolean validateBurger(Burger burger) {
 
         if (!ValidationHelper.validateNotEmpty(burger.getNom(), "Nom")) {
@@ -63,7 +64,8 @@ public class BurgerServiceImpl implements IBurgerService {
         burger.setNom(ValidationHelper.cleanString(burger.getNom()));
         burger.setDescription(ValidationHelper.cleanString(burger.getDescription()));
     }
-        @Override
+
+    @Override
     public Burger findById(Integer id) {
         if (!ValidationHelper.isValidId(id)) {
             return null;
@@ -80,7 +82,8 @@ public class BurgerServiceImpl implements IBurgerService {
     public List<Burger> findAllNonArchived() {
         return burgerRepository.findAllNonArchived();
     }
-        @Override
+
+    @Override
     public Burger update(Burger burger) {
         if (!ValidationHelper.isValidId(burger.getId())) {
             return null;
@@ -92,6 +95,14 @@ public class BurgerServiceImpl implements IBurgerService {
 
         cleanBurger(burger);
         return burgerRepository.update(burger);
+    }
+
+    @Override
+    public boolean archive(Integer id) {
+        if (!ValidationHelper.isValidId(id)) {
+            return false;
+        }
+        return burgerRepository.archive(id);
     }
 
 }

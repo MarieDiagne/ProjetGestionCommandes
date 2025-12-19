@@ -1,0 +1,14 @@
+@model BrasilBurger.ViewModels.Panier.PanierViewModel
+
+<h2>Mon Panier</h2>
+
+@foreach (var l in Model.Lignes)
+{
+    <p>
+        @l.Nom - @l.Quantite x @l.Prix
+        <a href="/Panier/Supprimer/@l.ProduitId">X</a>
+    </p>
+}
+
+<h3>Total : @Model.Total FCFA</h3>
+<a href="/Commande/Passer">Commander</a>

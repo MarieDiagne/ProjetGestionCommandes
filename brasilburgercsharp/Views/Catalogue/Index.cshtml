@@ -1,0 +1,12 @@
+@model IEnumerable<BrasilBurger.Models.Entities.Burger>
+
+<h2>Catalogue Burgers</h2>
+
+@foreach (var b in Model)
+{
+    <div>
+        <h3>@b.Nom</h3>
+        <p>@b.Prix FCFA</p>
+        <a href="/Catalogue/DetailsBurger/@b.Id">Détails</a>
+    </div>
+}

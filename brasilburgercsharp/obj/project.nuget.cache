@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "xsDHPN2dSC4=",
+  "dgSpecHash": "wev0Zxqw2aI=",
   "success": true,
   "projectFilePath": "C:\\Users\\ASUS_COMPUTER\\Desktop\\ProjetGestionCommandes\\brasilburgercsharp\\brasilburgercsharp.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\ASUS_COMPUTER\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
+    "C:\\Users\\ASUS_COMPUTER\\.nuget\\packages\\microsoft.entityframeworkcore.tools\\10.0.1\\microsoft.entityframeworkcore.tools.10.0.1.nupkg.sha512"
+  ],
   "logs": []
 }

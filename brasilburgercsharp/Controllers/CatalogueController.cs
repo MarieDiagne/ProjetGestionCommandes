@@ -1,28 +1,20 @@
-using Microsoft.AspNetCore.Mvc;
-using BrasilBurger.Services.Interfaces;
+private readonly IMenuService _menuService;
 
-namespace BrasilBurger.Controllers
+public CatalogueController(IBurgerService burgerService, IMenuService menuService)
 {
-    public class CatalogueController : Controller
-    {
-        private readonly IBurgerService _burgerService;
+    _burgerService = burgerService;
+    _menuService = menuService;
+}
 
-        public CatalogueController(IBurgerService burgerService)
-        {
-            _burgerService = burgerService;
-        }
+public async Task<IActionResult> Menus()
+{
+    var menus = await _menuService.GetAll();
+    return View(menus);
+}
 
-        public async Task<IActionResult> Index()
-        {
-            var burgers = await _burgerService.GetAll();
-            return View(burgers);
-        }
-
-        public async Task<IActionResult> DetailsBurger(int id)
-        {
-            var burger = await _burgerService.GetById(id);
-            if (burger == null) return NotFound();
-            return View(burger);
-        }
-    }
+public async Task<IActionResult> DetailsMenu(int id)
+{
+    var menu = await _menuService.GetById(id);
+    if (menu == null) return NotFound();
+    return View(menu);
 }

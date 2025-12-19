@@ -42,4 +42,11 @@ namespace BrasilBurger.Controllers
 
         public IActionResult Confirmation() => View();
     }
+    public async Task<IActionResult> MesCommandes()
+    {
+        var client = HttpContext.Session.Get<Client>("client");
+        var commandes = await _commandeService.GetByClient(client!.Id);
+        return View(commandes);
+    }
+
 }

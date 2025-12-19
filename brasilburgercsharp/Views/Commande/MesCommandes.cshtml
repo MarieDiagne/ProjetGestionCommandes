@@ -1,0 +1,7 @@
+<h2>Mes Commandes</h2>
+@foreach (var c in Model)
+{
+    <p>
+        Commande #@c.Id - @c.Montant FCFA - @c.Etat
+    </p>
+}

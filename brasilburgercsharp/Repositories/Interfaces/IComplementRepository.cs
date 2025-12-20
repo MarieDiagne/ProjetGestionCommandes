@@ -1,16 +1,10 @@
-using System.Linq.Expressions;
+using brasilburgercsharp.Models.Entities;
 
-namespace BrasilBurger.Repositories.Interfaces
+namespace brasilburgercsharp.Repositories.Interfaces
 {
-    public interface IComplementRepository : IRepository<Complement>
+    public interface IComplementRepository
     {
-        Task<IEnumerable<Complement>> GetComplementsNonArchivesAsync();
-        Task<IEnumerable<Complement>> GetComplementsByTypeAsync(TypeComplementEnum type);
-        Task<IEnumerable<Complement>> GetBoissonsAsync();
-        Task<IEnumerable<Complement>> GetFritesAsync();
+        Task<IEnumerable<Complement>> GetAllAsync();
+        Task<Complement?> GetByIdAsync(int id);
     }
-    
-
-
-    
 }

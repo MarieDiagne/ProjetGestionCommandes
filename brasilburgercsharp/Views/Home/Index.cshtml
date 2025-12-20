@@ -1,8 +1,111 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Accueil";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero-section">
+    <div>
+        <h1 class="fade-in">🍔 Bienvenue chez Brasil Burger</h1>
+        <p class="fade-in">Les meilleurs burgers de Dakar !</p>
+        <a href="@Url.Action("Index", "Catalogue")" class="btn btn-brasil btn-lg mt-3">
+            <i class="fas fa-utensils"></i> Voir le Menu
+        </a>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <!-- Stats client si connecté -->
+    @if (ViewBag.Client != null)
+    {
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="mb-4">
+                    <i class="fas fa-user-circle"></i> Bienvenue @ViewBag.Client.Prenom !
+                </h2>
+            </div>
+            @if (ViewBag.CommandesRecentes != null && ViewBag.CommandesRecentes.Count > 0)
+            {
+                <div class="col-12">
+                    <h4 class="mb-3">Vos dernières commandes</h4>
+                    <div class="row">
+                        @foreach (var commande in ViewBag.CommandesRecentes)
+                        {
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Commande #@commande.Id</h5>
+                                        <p class="card-text">
+                                            <i class="fas fa-calendar"></i> @commande.DateCommande.ToString("dd/MM/yyyy HH:mm")<br>
+                                            <i class="fas fa-money-bill"></i> @commande.MontantTotal.ToString("N0") FCFA
+                                        </p>
+                                        <span class="badge status-@commande.Etat.ToLower()">@commande.Etat</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Burgers populaires -->
+    @if (ViewBag.BurgersPopulaires != null)
+    {
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="mb-4"><i class="fas fa-fire text-danger"></i> Nos Burgers Populaires</h2>
+            </div>
+            @foreach (var burger in ViewBag.BurgersPopulaires)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card product-card">
+                        <img src="@(string.IsNullOrEmpty(burger.ImageUrl) ? "/images/default-burger.jpg" : burger.ImageUrl)" class="card-img-top" alt="@burger.Nom">
+                        <div class="card-body">
+                            <h5 class="card-title">@burger.Nom</h5>
+                            <p class="card-text">@burger.Description</p>
+                            <div class="price-tag">@burger.Prix.ToString("N0") FCFA</div>
+                            <a href="@Url.Action("DetailsBurger", "Catalogue", new { id = burger.Id })" class="btn btn-brasil w-100">
+                                <i class="fas fa-eye"></i> Voir détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Menus populaires -->
+    @if (ViewBag.MenusPopulaires != null)
+    {
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="mb-4"><i class="fas fa-star text-warning"></i> Nos Menus Populaires</h2>
+            </div>
+            @foreach (var menu in ViewBag.MenusPopulaires)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card product-card">
+                        <img src="@(string.IsNullOrEmpty(menu.ImageUrl) ? "/images/default-menu.jpg" : menu.ImageUrl)" class="card-img-top" alt="@menu.Nom">
+                        <div class="card-body">
+                            <h5 class="card-title">@menu.Nom</h5>
+                            <p class="card-text">@menu.Description</p>
+                            <div class="price-tag">@menu.Prix.ToString("N0") FCFA</div>
+                            <a href="@Url.Action("DetailsMenu", "Catalogue", new { id = menu.Id })" class="btn btn-brasil w-100">
+                                <i class="fas fa-eye"></i> Voir détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- CTA -->
+    <div class="text-center my-5 py-5" style="background: linear-gradient(135deg, #009739 0%, #007A2F 100%); border-radius: 15px; color: white;">
+        <h2 class="mb-3"><i class="fas fa-shopping-cart"></i> Prêt à commander ?</h2>
+        <p class="lead">Découvrez notre menu complet et passez votre commande maintenant !</p>
+        <a href="@Url.Action("Index", "Catalogue")" class="btn btn-outline-light btn-lg">
+            <i class="fas fa-utensils"></i> Voir tout le menu
+        </a>
+    </div>
 </div>

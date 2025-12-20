@@ -1,38 +1,42 @@
 using Microsoft.AspNetCore.Mvc;
-using BrasilBurger.Services.Interfaces;
-using BrasilBurger.ViewModels.Panier;
+using brasilburgercsharp.Models.Entities;
+using brasilburgercsharp.Repositories.Interfaces;
+using System.Text.Json;
 
-namespace BrasilBurger.Controllers
+namespace brasilburgercsharp.Repositories.Implementations
 {
     public class PanierController : Controller
     {
-        private readonly IPanierService _panierService;
+        private readonly IProduitRepository _repo;
+        private const string SessionKey = "MonPanier";
 
-        public PanierController(IPanierService panierService)
-        {
-            _panierService = panierService;
-        }
+        public PanierController(IProduitRepository repo) => _repo = repo;
 
         public IActionResult Index()
-            => View(_panierService.GetPanier());
-
-        public IActionResult Ajouter(int id, string nom, decimal prix)
         {
-            _panierService.Ajouter(new LignePanierViewModel
+            var panier = GetPanier();
+            return View(panier);
+        }
+
+        public async Task<IActionResult> Ajouter(int id)
+        {
+            var produit = await _repo.GetByIdAsync(id);
+            if (produit != null)
             {
-                ProduitId = id,
-                Nom = nom,
-                Prix = prix,
-                Quantite = 1
-            });
-
+                var panier = GetPanier();
+                panier.Add(produit);
+                SavePanier(panier);
+            }
             return RedirectToAction("Index");
         }
 
-        public IActionResult Supprimer(int id)
+        private List<Produit> GetPanier()
         {
-            _panierService.Supprimer(id);
-            return RedirectToAction("Index");
+            var data = HttpContext.Session.GetString(SessionKey);
+            return data == null ? new List<Produit>() : JsonSerializer.Deserialize<List<Produit>>(data)!;
         }
+
+        private void SavePanier(List<Produit> panier) 
+            => HttpContext.Session.SetString(SessionKey, JsonSerializer.Serialize(panier));
     }
 }

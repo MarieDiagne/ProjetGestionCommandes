@@ -1,12 +1,33 @@
-using System.Collections.Generic;
+using brasilburgercsharp.Models.Enums;
+using System.ComponentModel.DataAnnotations;
 
-namespace BrasilBurger.Models.Entities
+namespace brasilburgercsharp.Models.Entities
 {
-    public class Client : Utilisateur
+    public class Client
     {
-        public string Adresse { get; set; } = null!;
+        public int Id { get; set; }
 
-        // Navigation
-        public ICollection<Commande> Commandes { get; set; } = new List<Commande>();
+        [Required]
+        [MaxLength(50)]
+        public string Nom { get; set; }
+
+        [Required]
+        [MaxLength(50)]
+        public string Prenom { get; set; }
+
+        [Required]
+        [Phone]
+        public string Telephone { get; set; }
+
+        [EmailAddress]
+        public string? Email { get; set; }
+
+        public string? Adresse { get; set; }
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string MotDePasse { get; set; }
+
+        public RoleEnum Role { get; set; } = RoleEnum.CLIENT;
     }
 }

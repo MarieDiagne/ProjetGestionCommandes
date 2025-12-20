@@ -1,7 +1,42 @@
-<h2>Mes Commandes</h2>
-@foreach (var c in Model)
-{
-    <p>
-        Commande #@c.Id - @c.Montant FCFA - @c.Etat
-    </p>
-}
+@model IEnumerable<brasilburgercsharp.Models.Entities.Commande>
+
+<div class="container">
+    <h2 class="my-4">Historique de mes commandes</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">Vous n'avez pas encore passé de commande.</div>
+    }
+    else
+    {
+        <table class="table table-striped shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>N°</th>
+                    <th>Date</th>
+                    <th>Montant Total</th>
+                    <th>État</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var cmd in Model)
+                {
+                    <tr>
+                        <td>@cmd.Id</td>
+                        <td>@cmd.DateCommande.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="fw-bold">@cmd.MontantTotal.ToString("N0") CFA</td>
+                        <td>
+                            <span class="badge @(cmd.Etat == brasilburgercsharp.Models.Enums.EtatCommandeEnum.VALIDEE ? "bg-success" : "bg-warning")">
+                                @cmd.Etat
+                            </span>
+                        </td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@cmd.Id" class="btn btn-sm btn-outline-primary">Voir détails</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

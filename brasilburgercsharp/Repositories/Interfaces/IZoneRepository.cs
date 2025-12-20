@@ -1,13 +1,15 @@
-using System.Linq.Expressions;
+using brasilburgercsharp.Models.Entities;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace BrasilBurger.Repositories.Interfaces
+namespace brasilburgercsharp.Repositories.Interfaces
+{
+    public interface IZoneRepository
     {
-        public interface IZoneRepository : IRepository<Zone>
-        {
-            Task<IEnumerable<Zone>> GetAllZonesAsync();
-            Task<Zone?> GetZoneByNomAsync(string nom);
-        
-
-
-        }
+        Task<List<Zone>> GetAllAsync();
+        Task<Zone?> GetByIdAsync(int id);
+        Task AddAsync(Zone zone);
+        Task UpdateAsync(Zone zone);
+        Task DeleteAsync(int id);
     }
+}

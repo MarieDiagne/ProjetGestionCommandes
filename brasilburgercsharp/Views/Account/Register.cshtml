@@ -1,0 +1,100 @@
+@model brasilburgercsharp.ViewModels.Account.RegisterViewModel
+@{
+    ViewData["Title"] = "Inscription";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-brasil text-white text-center py-4">
+                    <h3 class="mb-0"><i class="fas fa-user-plus"></i> Créer un compte</h3>
+                </div>
+                <div class="card-body p-5">
+                    <form asp-action="Register" method="post">
+                        <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                        
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Nom" class="form-label">
+                                    <i class="fas fa-user"></i> Nom *
+                                </label>
+                                <input asp-for="Nom" class="form-control" />
+                                <span asp-validation-for="Nom" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Prenom" class="form-label">
+                                    <i class="fas fa-user"></i> Prénom *
+                                </label>
+                                <input asp-for="Prenom" class="form-control" />
+                                <span asp-validation-for="Prenom" class="text-danger"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Telephone" class="form-label">
+                                <i class="fas fa-phone"></i> Numéro de téléphone *
+                            </label>
+                            <input asp-for="Telephone" class="form-control" placeholder="Ex: 771234567" />
+                            <span asp-validation-for="Telephone" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">
+                                <i class="fas fa-envelope"></i> Email (optionnel)
+                            </label>
+                            <input asp-for="Email" class="form-control" type="email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Adresse" class="form-label">
+                                <i class="fas fa-map-marker-alt"></i> Adresse (optionnel)
+                            </label>
+                            <textarea asp-for="Adresse" class="form-control" rows="2"></textarea>
+                            <span asp-validation-for="Adresse" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="MotDePasse" class="form-label">
+                                    <i class="fas fa-lock"></i> Mot de passe *
+                                </label>
+                                <input asp-for="MotDePasse" class="form-control" type="password" />
+                                <span asp-validation-for="MotDePasse" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ConfirmMotDePasse" class="form-label">
+                                    <i class="fas fa-lock"></i> Confirmer mot de passe *
+                                </label>
+                                <input asp-for="ConfirmMotDePasse" class="form-control" type="password" />
+                                <span asp-validation-for="ConfirmMotDePasse" class="text-danger"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-brasil btn-lg">
+                                <i class="fas fa-user-plus"></i> Créer mon compte
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3">
+                    <p class="mb-0">Déjà un compte ? 
+                        <a href="@Url.Action("Login", new { returnUrl = ViewData["ReturnUrl"] })" class="text-decoration-none fw-bold">
+                            Se connecter
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

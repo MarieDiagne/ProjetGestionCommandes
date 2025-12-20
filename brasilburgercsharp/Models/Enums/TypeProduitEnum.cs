@@ -1,9 +1,9 @@
-namespace BrasilBurger.Models.Enums
+namespace brasilburgercsharp.Models.Enums
 {
     public enum TypeProduitEnum
     {
-        BURGER = 1,
-        MENU = 2,
-        COMPLEMENT = 3
+        BURGER,
+        MENU,
+        COMPLEMENT
     }
 }

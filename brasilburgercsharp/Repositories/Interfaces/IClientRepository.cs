@@ -1,15 +1,16 @@
-using System.Linq.Expressions;
+using brasilburgercsharp.Models.Entities;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace BrasilBurger.Repositories.Interfaces
+namespace brasilburgercsharp.Repositories.Interfaces
 {
-    public interface IClientRepository : IRepository<Client>
+    public interface IClientRepository
     {
-        Task<Client?> GetClientByUtilisateurIdAsync(int utilisateurId);
-        Task<Client?> GetClientWithCommandesAsync(int id);
-        Task<Utilisateur?> GetUtilisateurByEmailAsync(string email);
-        Task<bool> EmailExistsAsync(string email);
+        Task<List<Client>> GetAllAsync();
+        Task<Client?> GetByIdAsync(int id);
+        Task<Client?> GetByTelephoneAsync(string telephone);
+        Task AddAsync(Client client);
+        Task UpdateAsync(Client client);
+        Task DeleteAsync(int id);
     }
-
-
-
 }

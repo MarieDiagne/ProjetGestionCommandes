@@ -1,32 +1,31 @@
-using BrasilBurger.Data;
-using BrasilBurger.Models.Entities;
-using BrasilBurger.Models.Enums;
-using BrasilBurger.Services.Interfaces;
+using brasilburgercsharp.Data;
+using brasilburgercsharp.Models.Entities;
+using brasilburgercsharp.Models.Enums;
+using brasilburgercsharp.Services.Interfaces;
 
-namespace BrasilBurger.Services.Implementations
+namespace brasilburgercsharp.Services.Implementations
 {
     public class PaiementService : IPaiementService
     {
         private readonly ApplicationDbContext _context;
-
         public PaiementService(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public async Task<Paiement> Payer(int commandeId, decimal montant, ModePaiementEnum mode)
+        public async Task<bool> EnregistrerPaiement(int commandeId, decimal montant, ModePaiementEnum mode)
         {
             var paiement = new Paiement
             {
                 CommandeId = commandeId,
                 Montant = montant,
-                ModePaiement = mode
+                ModePaiement = mode,
+                DatePaiement = DateTime.UtcNow
             };
-
+            
             _context.Paiements.Add(paiement);
-            await _context.SaveChangesAsync();
-
-            return paiement;
+            int result = await _context.SaveChangesAsync();
+            return result > 0;
         }
     }
 }

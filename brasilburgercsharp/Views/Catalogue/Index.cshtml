@@ -1,12 +1,25 @@
-@model IEnumerable<BrasilBurger.Models.Entities.Burger>
+@model brasilburgercsharp.ViewModels.Catalogue.CatalogueViewModel
 
-<h2>Catalogue Burgers</h2>
-
-@foreach (var b in Model)
-{
-    <div>
-        <h3>@b.Nom</h3>
-        <p>@b.Prix FCFA</p>
-        <a href="/Catalogue/DetailsBurger/@b.Id">Détails</a>
+<div class="container mt-4">
+    <h2>Notre Carte Brasil Burger</h2>
+    <div class="btn-group mb-3">
+        <a asp-action="Index" asp-route-type="BURGER" class="btn btn-outline-primary">Burgers</a>
+        <a asp-action="Index" asp-route-type="MENU" class="btn btn-outline-primary">Menus</a>
     </div>
-}
+
+    <div class="row">
+        @foreach (var item in Model.Produits)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <img src="~/images/@item.Image" class="card-img-top" alt="@item.Nom">
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Nom</h5>
+                        <p class="text-success fw-bold">@item.Prix CFA</p>
+                        <a asp-action="DetailsBurger" asp-route-id="@item.Id" class="btn btn-sm btn-dark">Voir détails</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

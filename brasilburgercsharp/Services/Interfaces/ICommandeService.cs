@@ -1,9 +1,12 @@
-using BrasilBurger.Models.Entities;
+using brasilburgercsharp.Models.Entities;
+using brasilburgercsharp.ViewModels.Commande;
 
-namespace BrasilBurger.Services.Interfaces
+namespace brasilburgercsharp.Services.Interfaces
 {
     public interface ICommandeService
     {
-        Task<IEnumerable<Commande>> GetByClient(int clientId);
+        Task<int> CreerCommandeAsync(CommandeViewModel model, int clientId);
+        Task<IEnumerable<Commande>> GetCommandesByClientAsync(int clientId);
+        Task<Commande?> GetDetailsAsync(int id); // Cette ligne doit être présente
     }
 }

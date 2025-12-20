@@ -1,17 +1,18 @@
-using System.Linq.Expressions;
+using brasilburgercsharp.Models.Entities;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using brasilburgercsharp.Models.Enums;
 
-namespace BrasilBurger.Repositories.Interfaces
+namespace brasilburgercsharp.Repositories.Interfaces
 {
-    public interface ICommandeRepository : IRepository<Commande>
+    public interface ICommandeRepository
     {
-        Task<IEnumerable<Commande>> GetCommandesByClientIdAsync(int clientId);
-        Task<Commande?> GetCommandeWithDetailsAsync(int id);
-        Task<IEnumerable<Commande>> GetCommandesByDateAsync(DateTime date);
-        Task<IEnumerable<Commande>> GetCommandesByEtatAsync(EtatCommandeEnum etat);
-        Task<decimal> GetRecettesJournalieresAsync(DateTime date);
+        Task<List<Commande>> GetAllAsync();
+        Task<Commande?> GetByIdAsync(int id);
+        Task<List<Commande>> GetByClientIdAsync(int clientId);
+        Task<List<Commande>> GetByClientIdAndEtatAsync(int clientId, EtatCommandeEnum etat);
+        Task AddAsync(Commande commande);
+        Task UpdateAsync(Commande commande);
+        Task DeleteAsync(int id);
     }
-    
-
-
-    
 }

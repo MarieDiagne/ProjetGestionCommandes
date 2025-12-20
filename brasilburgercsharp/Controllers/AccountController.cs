@@ -1,48 +1,55 @@
 using Microsoft.AspNetCore.Mvc;
-using BrasilBurger.Services.Interfaces;
-using BrasilBurger.Models.Entities;
-using BrasilBurger.Helpers;
+using brasilburgercsharp.ViewModels.Account;
+using brasilburgercsharp.Services.Interfaces;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
-namespace BrasilBurger.Controllers
+namespace brasilburgercsharp.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly IAuthService _authService;
+        private readonly IClientService _clientService;
 
-        public AccountController(IAuthService authService)
-        {
-            _authService = authService;
-        }
+        public AccountController(IClientService clientService) => _clientService = clientService;
 
         public IActionResult Login() => View();
 
         [HttpPost]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            var client = await _authService.Login(email, password);
-            if (client == null)
+            var user = await _clientService.AuthenticateAsync(model.Email, model.Password);
+            if (user != null)
             {
-                ViewBag.Error = "Identifiants invalides";
-                return View();
+                var claims = new List<Claim> {
+                    new Claim(ClaimTypes.Name, user.Nom),
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim("Id", user.Id.ToString()),
+                    new Claim(ClaimTypes.Role, "CLIENT")
+                };
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+                return RedirectToAction("Index", "Catalogue");
             }
-
-            HttpContext.Session.Set("client", client);
-            return RedirectToAction("Index", "Catalogue");
+            ModelState.AddModelError("", "Email ou mot de passe incorrect");
+            return View(model);
         }
 
         public IActionResult Register() => View();
 
         [HttpPost]
-        public async Task<IActionResult> Register(Client client)
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            await _authService.Register(client);
-            return RedirectToAction("Login");
+            if (ModelState.IsValid) {
+                await _clientService.RegisterAsync(model);
+                return RedirectToAction("Login");
+            }
+            return View(model);
         }
 
-        public IActionResult Logout()
-        {
-            HttpContext.Session.Clear();
-            return RedirectToAction("Login");
+        public async Task<IActionResult> Logout() {
+            await HttpContext.SignOutAsync();
+            return RedirectToAction("Index", "Home");
         }
     }
 }

@@ -1,52 +1,96 @@
 using Microsoft.AspNetCore.Mvc;
-using BrasilBurger.Services.Interfaces;
-using BrasilBurger.Models.Entities;
-using BrasilBurger.Models.Enums;
-using BrasilBurger.Helpers;
+using brasilburgercsharp.Services.Interfaces;
+using brasilburgercsharp.ViewModels.Commande;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
-namespace BrasilBurger.Controllers
+namespace brasilburgercsharp.Controllers
 {
+    [Authorize] // Nécessite d'être connecté pour commander
     public class CommandeController : Controller
     {
+        private readonly ICommandeService _commandeService;
         private readonly IPanierService _panierService;
-        private readonly ApplicationDbContext _context;
+        private readonly IZoneService _zoneService; // Pour lister les zones de livraison
 
-        public CommandeController(IPanierService panierService, ApplicationDbContext context)
+        public CommandeController(
+            ICommandeService commandeService, 
+            IPanierService panierService,
+            IZoneService zoneService)
         {
+            _commandeService = commandeService;
             _panierService = panierService;
-            _context = context;
+            _zoneService = zoneService;
         }
 
-        public IActionResult Passer() => View();
-
-        [HttpPost]
-        public async Task<IActionResult> Passer(TypeCommandeEnum type)
+        // Affiche le formulaire de finalisation de commande
+        [HttpGet]
+        public async Task<IActionResult> Passer()
         {
-            var client = HttpContext.Session.Get<Client>("client");
             var panier = _panierService.GetPanier();
-
-            var commande = new Commande
+            if (panier.Lignes.Count == 0)
             {
-                ClientId = client!.Id,
-                TypeCommande = type,
-                Montant = panier.Total,
-                Etat = EtatCommandeEnum.VALIDE
-            };
+                return RedirectToAction("Index", "Catalogue");
+            }
 
-            _context.Commandes.Add(commande);
-            await _context.SaveChangesAsync();
-
-            _panierService.Vider();
-            return RedirectToAction("Confirmation");
+            ViewBag.Zones = await _zoneService.GetAllZonesAsync();
+            return View(new CommandeViewModel());
         }
 
-        public IActionResult Confirmation() => View();
-    }
-    public async Task<IActionResult> MesCommandes()
-    {
-        var client = HttpContext.Session.Get<Client>("client");
-        var commandes = await _commandeService.GetByClient(client!.Id);
-        return View(commandes);
-    }
+        // Traite la validation de la commande
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Confirmer(CommandeViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Zones = await _zoneService.GetAllZonesAsync();
+                return View("Passer", model);
+            }
 
+            // Récupération de l'ID du client connecté
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) return RedirectToAction("Login", "Account");
+
+            int clientId = int.Parse(userIdClaim.Value);
+
+            try
+            {
+                int commandeId = await _commandeService.CreerCommandeAsync(model, clientId);
+                
+                // Vider le panier après succès
+                _panierService.ViderPanier();
+
+                TempData["Success"] = "Votre commande a été enregistrée avec succès !";
+                return RedirectToAction("Details", new { id = commandeId });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Une erreur est survenue lors de la commande : " + ex.Message);
+                ViewBag.Zones = await _zoneService.GetAllZonesAsync();
+                return View("Passer", model);
+            }
+        }
+
+        // Affiche les détails d'une commande spécifique
+        public async Task<IActionResult> Details(int id)
+        {
+            var commande = await _commandeService.GetDetailsAsync(id);
+            if (commande == null) return NotFound();
+
+            return View(commande);
+        }
+
+        // Liste des commandes du client
+        public async Task<IActionResult> MesCommandes()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) return RedirectToAction("Login", "Account");
+
+            int clientId = int.Parse(userIdClaim.Value);
+            var commandes = await _commandeService.GetCommandesByClientAsync(clientId);
+            
+            return View(commandes);
+        }
+    }
 }

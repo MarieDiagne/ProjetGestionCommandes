@@ -1,42 +1,69 @@
-using BrasilBurger.Services.Interfaces;
-using BrasilBurger.ViewModels.Panier;
+using brasilburgercsharp.Models.Entities;
+using brasilburgercsharp.Models.Enums;
+using brasilburgercsharp.Services.Interfaces;
+using brasilburgercsharp.ViewModels.Panier;
 using Microsoft.AspNetCore.Http;
-using BrasilBurger.Helpers;
+using System.Text.Json;
 
-namespace BrasilBurger.Services.Implementations
+namespace brasilburgercsharp.Services.Implementations
 {
     public class PanierService : IPanierService
     {
-        private readonly IHttpContextAccessor _http;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private const string SessionKey = "PanierBrasilBurger";
 
-        public PanierService(IHttpContextAccessor http)
+        public PanierService(IHttpContextAccessor httpContextAccessor)
         {
-            _http = http;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        private ISession Session => _http.HttpContext!.Session;
-
+        // Implémentation de GetPanier (Retourne PanierViewModel)
         public PanierViewModel GetPanier()
-            => Session.Get<PanierViewModel>("panier") ?? new PanierViewModel();
-
-        public void Ajouter(LignePanierViewModel ligne)
         {
-            var panier = GetPanier();
-            var exist = panier.Lignes.FirstOrDefault(l => l.ProduitId == ligne.ProduitId);
+            var session = _httpContextAccessor.HttpContext?.Session;
+            if (session == null) return new PanierViewModel();
 
-            if (exist != null) exist.Quantite++;
-            else panier.Lignes.Add(ligne);
-
-            Session.Set("panier", panier);
+            string? json = session.GetString(SessionKey);
+            return json == null ? new PanierViewModel() : JsonSerializer.Deserialize<PanierViewModel>(json)!;
         }
 
-        public void Supprimer(int produitId)
+        // Implémentation de AjouterProduit (Prend un Produit en paramètre)
+        public void AjouterProduit(Produit produit)
         {
             var panier = GetPanier();
-            panier.Lignes.RemoveAll(l => l.ProduitId == produitId);
-            Session.Set("panier", panier);
+            var ligne = panier.Lignes.FirstOrDefault(l => l.ProduitId == produit.Id);
+
+            if (ligne == null)
+            {
+                panier.Lignes.Add(new LignePanierViewModel
+                {
+                    ProduitId = produit.Id,
+                    NomProduit = produit.Nom,
+                    Prix = produit.Prix,
+                    Quantite = 1,
+                    Image = produit.Image,
+                    // Utilisation de l'énumération correcte
+                    TypeProduit = produit is Menu ? TypeProduitEnum.MENU : TypeProduitEnum.BURGER
+                });
+            }
+            else
+            {
+                ligne.Quantite++;
+            }
+
+            SavePanier(panier);
         }
 
-        public void Vider() => Session.Remove("panier");
+        // Implémentation de ViderPanier
+        public void ViderPanier()
+        {
+            _httpContextAccessor.HttpContext?.Session.Remove(SessionKey);
+        }
+
+        private void SavePanier(PanierViewModel panier)
+        {
+            var json = JsonSerializer.Serialize(panier);
+            _httpContextAccessor.HttpContext?.Session.SetString(SessionKey, json);
+        }
     }
 }

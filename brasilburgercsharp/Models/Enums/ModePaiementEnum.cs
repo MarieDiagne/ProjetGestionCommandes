@@ -1,8 +1,8 @@
-namespace BrasilBurger.Models.Enums
+namespace brasilburgercsharp.Models.Enums
 {
     public enum ModePaiementEnum
     {
-        WAVE = 1,
-        ORANGE_MONEY = 2
+        WAVE,
+        OM
     }
 }

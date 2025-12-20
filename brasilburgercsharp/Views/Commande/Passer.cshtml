@@ -1,0 +1,64 @@
+@model brasilburgercsharp.ViewModels.Commande.CommandeViewModel
+@using brasilburgercsharp.Models.Enums
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 shadow-sm p-4 bg-white rounded">
+            <form asp-action="Confirmer" asp-controller="Commande" method="post">
+                <h3 class="text-center mb-4">Finaliser votre commande</h3>
+                
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger" asp-validation-summary="All"></div>
+                }
+
+                <div class="form-group mb-3">
+                    <label class="form-label font-weight-bold">Type de commande</label>
+                    <select asp-for="TypeCommande" class="form-select" id="typeCommandeSelect">
+                        <option value="@TypeCommandeEnum.SUR_PLACE">Sur Place</option>
+                        <option value="@TypeCommandeEnum.EMPORTE">À emporter</option>
+                        <option value="@TypeCommandeEnum.LIVRAISON">Livraison</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-3" id="zoneSection" style="display:none;">
+                    <label class="form-label font-weight-bold">Zone de livraison</label>
+                    <select asp-for="ZoneId" class="form-select">
+                        <option value="">-- Sélectionnez votre zone --</option>
+                        @if (ViewBag.Zones != null)
+                        {
+                            foreach (var zone in ViewBag.Zones)
+                            {
+                                <option value="@zone.Id">@zone.Nom (@zone.PrixLivraison FCFA)</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label font-weight-bold">Mode de Paiement</label>
+                    <select asp-for="ModePaiement" class="form-select">
+                        <option value="@ModePaiementEnum.WAVE">Wave</option>
+                        <option value="@ModePaiementEnum.OM">Orange Money</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-success mt-4 w-100 py-2 font-weight-bold">Payer et Valider</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Petit script pour afficher/cacher le choix de la zone selon le type de commande
+        document.getElementById('typeCommandeSelect').addEventListener('change', function() {
+            var zoneSection = document.getElementById('zoneSection');
+            if (this.value === 'LIVRAISON') {
+                zoneSection.style.display = 'block';
+            } else {
+                zoneSection.style.display = 'none';
+            }
+        });
+    </script>
+}

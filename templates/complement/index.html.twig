@@ -1,0 +1,225 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des compléments{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --burger-red: #e63946;
+        --burger-dark: #1d3557;
+        --burger-light: #f8f9fa;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--burger-dark), #2b4d7a);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .complement-card {
+        border: none;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        background: white;
+    }
+
+    .complement-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+    }
+
+    .img-container {
+        position: relative;
+        height: 160px;
+        overflow: hidden;
+        background-color: #f1f3f5;
+    }
+
+    .img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .complement-card:hover .img-container img {
+        transform: scale(1.1);
+    }
+
+    .price-tag {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--burger-red);
+    }
+
+    .section-title {
+        font-weight: 800;
+        color: var(--burger-dark);
+        border-left: 5px solid var(--burger-red);
+        padding-left: 15px;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-add {
+        background-color: var(--burger-red);
+        border: none;
+        padding: 10px 25px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-add:hover {
+        background-color: #c92a35;
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(230, 57, 70, 0.4);
+    }
+
+    .archived-overlay {
+        filter: grayscale(100%);
+        opacity: 0.7;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-1 fw-bold">Gestion des Compléments</h1>
+            <p class="mb-0 opacity-75">Boissons, frites et accompagnements</p>
+        </div>
+        <a href="{{ path('app_complement_new') }}" class="btn btn-danger btn-add">
+            <i class="bi bi-plus-lg me-2"></i>Nouveau Complément
+        </a>
+    </div>
+
+    {% if complements is empty %}
+        <div class="card border-0 shadow-sm py-5 rounded-4 text-center">
+            <div class="card-body">
+                <i class="bi bi-cup-straw text-muted display-1"></i>
+                <h3 class="mt-4 fw-bold">Aucun complément trouvé</h3>
+                <p class="text-muted">Commencez par ajouter des boissons ou des frites à votre inventaire.</p>
+                <a href="{{ path('app_complement_new') }}" class="btn btn-outline-danger rounded-pill mt-2">
+                    Ajouter un complément
+                </a>
+            </div>
+        </div>
+    {% else %}
+
+        {% set boissons = complements|filter(c => c.type == 'BOISSON') %}
+        {% if boissons is not empty %}
+            <h4 class="section-title">
+                <i class="bi bi-cup-straw text-info"></i> Boissons 
+                <span class="badge bg-light text-muted ms-2">{{ boissons|length }}</span>
+            </h4>
+            <div class="row mb-5">
+                {% for complement in boissons %}
+                    <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
+                        <div class="card h-100 complement-card shadow-sm {% if complement.isArchived %}archived-overlay{% endif %}">
+                            <div class="img-container">
+                                {% if complement.isArchived %}
+                                    <div class="position-absolute top-0 start-0 m-3 z-3">
+                                        <span class="badge bg-dark rounded-pill">Archivé</span>
+                                    </div>
+                                {% endif %}
+                                {% if complement.imageUrl %}
+                                    <img src="{{ complement.imageUrl }}" alt="{{ complement.libelle }}">
+                                {% else %}
+                                    <div class="bg-light d-flex align-items-center justify-content-center h-100">
+                                        <i class="bi bi-cup-straw text-muted" style="font-size: 2.5rem;"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="card-body d-flex flex-column">
+                                <h6 class="card-title fw-bold text-dark mb-1">{{ complement.libelle }}</h6>
+                                <span class="text-muted small mb-3">Boisson rafraîchissante</span>
+
+                                <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                                    <span class="price-tag">{{ complement.prix|number_format(0, ',', ' ') }} <small class="fs-6">FCFA</small></span>
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ path('app_complement_edit', {id: complement.id}) }}" class="btn btn-light btn-sm rounded-circle shadow-sm">
+                                            <i class="bi bi-pencil-fill text-primary"></i>
+                                        </a>
+                                        <form method="post" action="{{ path('app_complement_archive', {id: complement.id}) }}" onsubmit="return confirm('Êtes-vous sûr ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('archive_complement_' ~ complement.id) }}">
+                                            <button type="submit" class="btn btn-light btn-sm rounded-circle shadow-sm">
+                                                {% if complement.isArchived %}
+                                                    <i class="bi bi-arrow-counterclockwise text-success"></i>
+                                                {% else %}
+                                                    <i class="bi bi-archive-fill text-warning"></i>
+                                                {% endif %}
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% set frites = complements|filter(c => c.type == 'FRITE') %}
+        {% if frites is not empty %}
+            <h4 class="section-title">
+                <i class="bi bi-bag text-warning"></i> Frites & Accompagnements
+                <span class="badge bg-light text-muted ms-2">{{ frites|length }}</span>
+            </h4>
+            <div class="row">
+                {% for complement in frites %}
+                    <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
+                        <div class="card h-100 complement-card shadow-sm {% if complement.isArchived %}archived-overlay{% endif %}">
+                            <div class="img-container">
+                                {% if complement.isArchived %}
+                                    <div class="position-absolute top-0 start-0 m-3 z-3">
+                                        <span class="badge bg-dark rounded-pill">Archivé</span>
+                                    </div>
+                                {% endif %}
+                                {% if complement.imageUrl %}
+                                    <img src="{{ complement.imageUrl }}" alt="{{ complement.libelle }}">
+                                {% else %}
+                                    <div class="bg-light d-flex align-items-center justify-content-center h-100">
+                                        <i class="bi bi-bag text-muted" style="font-size: 2.5rem;"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="card-body d-flex flex-column">
+                                <h6 class="card-title fw-bold text-dark mb-1">{{ complement.libelle }}</h6>
+                                <span class="text-muted small mb-3">Accompagnement chaud</span>
+
+                                <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                                    <span class="price-tag">{{ complement.prix|number_format(0, ',', ' ') }} <small class="fs-6">FCFA</small></span>
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ path('app_complement_edit', {id: complement.id}) }}" class="btn btn-light btn-sm rounded-circle shadow-sm">
+                                            <i class="bi bi-pencil-fill text-primary"></i>
+                                        </a>
+                                        <form method="post" action="{{ path('app_complement_archive', {id: complement.id}) }}" onsubmit="return confirm('Êtes-vous sûr ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('archive_complement_' ~ complement.id) }}">
+                                            <button type="submit" class="btn btn-light btn-sm rounded-circle shadow-sm">
+                                                {% if complement.isArchived %}
+                                                    <i class="bi bi-arrow-counterclockwise text-success"></i>
+                                                {% else %}
+                                                    <i class="bi bi-archive-fill text-warning"></i>
+                                                {% endif %}
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    {% endif %}
+</div>
+{% endblock %}

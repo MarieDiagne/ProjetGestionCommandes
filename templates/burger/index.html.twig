@@ -1,0 +1,175 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Burgers{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --burger-red: #e63946;
+        --burger-dark: #1d3557;
+        --burger-light: #f8f9fa;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--burger-dark), #2b4d7a);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .burger-card {
+        border: none;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        background: white;
+    }
+
+    .burger-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+    }
+
+    .img-container {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .burger-card:hover .img-container img {
+        transform: scale(1.1);
+    }
+
+    .price-tag {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--burger-red);
+    }
+
+    .category-badge {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
+        color: #6c757d;
+    }
+
+    .btn-add {
+        background-color: var(--burger-red);
+        border: none;
+        padding: 10px 25px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-add:hover {
+        background-color: #c92a35;
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(230, 57, 70, 0.4);
+    }
+
+    .archived-overlay {
+        filter: grayscale(100%);
+        opacity: 0.7;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-1 fw-bold">Gestion des Burgers</h1>
+            <p class="mb-0 opacity-75">Gérez votre menu et vos disponibilités</p>
+        </div>
+        <a href="{{ path('app_burger_new') }}" class="btn btn-danger btn-add">
+            <i class="bi bi-plus-lg me-2"></i>Nouveau Burger
+        </a>
+    </div>
+
+    <div class="row">
+        {% if burgers is empty %}
+            <div class="col-12 text-center py-5">
+                <div class="card border-0 shadow-sm py-5 rounded-4">
+                    <div class="card-body">
+                        <i class="bi bi-search text-muted display-1"></i>
+                        <h3 class="mt-4 fw-bold">Aucun burger trouvé</h3>
+                        <p class="text-muted">Il semble que vous n'ayez pas encore ajouté de burgers à votre carte.</p>
+                        <a href="{{ path('app_burger_new') }}" class="btn btn-outline-danger rounded-pill mt-2">
+                            Créer mon premier burger
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            {% for burger in burgers %}
+                <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
+                    <div class="card h-100 burger-card shadow-sm {% if burger.isArchived %}archived-overlay{% endif %}">
+                        
+                        <div class="img-container">
+                            {% if burger.isArchived %}
+                                <div class="position-absolute top-0 start-0 m-3 z-3">
+                                    <span class="badge bg-dark rounded-pill shadow-sm">Archivé</span>
+                                </div>
+                            {% endif %}
+                            
+                            {% if burger.imageUrl %}
+                                <img src="{{ burger.imageUrl }}" alt="{{ burger.libelle }}">
+                            {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center h-100">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-2">
+                                <span class="category-badge">
+                                    {{ burger.categorie ? burger.categorie.nom : 'Non classé' }}
+                                </span>
+                                <h5 class="card-title fw-bold mb-0 text-dark">{{ burger.libelle }}</h5>
+                            </div>
+
+                            <p class="card-text text-muted small flex-grow-1">
+                                {{ burger.description|length > 85 ? burger.description|slice(0, 85) ~ '...' : burger.description }}
+                            </p>
+
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                <span class="price-tag">{{ burger.prix|number_format(0, ',', ' ') }} <small class="fs-6">FCFA</small></span>
+                                
+                                <div class="d-flex gap-1">
+                                    <a href="{{ path('app_burger_edit', {id: burger.id}) }}" class="btn btn-light btn-sm rounded-circle shadow-sm" title="Modifier">
+                                        <i class="bi bi-pencil-fill text-primary"></i>
+                                    </a>
+                                    
+                                    <form method="post" action="{{ path('app_burger_archive', {id: burger.id}) }}" onsubmit="return confirm('Êtes-vous sûr ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('archive_burger_' ~ burger.id) }}">
+                                        <button type="submit" class="btn btn-light btn-sm rounded-circle shadow-sm" title="{{ burger.isArchived ? 'Restaurer' : 'Archiver' }}">
+                                            {% if burger.isArchived %}
+                                                <i class="bi bi-arrow-counterclockwise text-success"></i>
+                                            {% else %}
+                                                <i class="bi bi-archive-fill text-warning"></i>
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

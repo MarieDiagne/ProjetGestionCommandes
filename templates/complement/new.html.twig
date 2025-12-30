@@ -1,0 +1,144 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau complément{% endblock %}
+
+{% block stylesheets %}
+<style>
+    :root {
+        --burger-red: #e63946;
+        --burger-dark: #1d3557;
+        --burger-light: #f8f9fa;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--burger-dark), #2b4d7a);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .form-card {
+        border: none;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--burger-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #dee2e6;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--burger-red);
+        box-shadow: 0 0 0 0.25rem rgba(230, 57, 70, 0.1);
+    }
+
+    .btn-submit {
+        background-color: var(--burger-red);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .btn-submit:hover {
+        background-color: #c92a35;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(230, 57, 70, 0.4);
+        color: white;
+    }
+
+    .btn-cancel {
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+    }
+
+    .breadcrumb-item a {
+        color: var(--burger-red);
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    
+    <div class="page-header">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="{{ path('app_complement_index') }}" class="text-white opacity-75">Compléments</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Nouveau</li>
+            </ol>
+        </nav>
+        <h1 class="h3 mb-0 fw-bold"><i class="bi bi-plus-circle me-2"></i>Créer un nouveau complément</h1>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card form-card">
+                <div class="card-body p-4 p-md-5">
+                    <form method="post" action="{{ path('app_complement_new') }}" enctype="multipart/form-data">
+                        <input type="hidden" name="_token" value="{{ csrf_token('create_complement') }}">
+
+                        <div class="mb-4">
+                            <label for="libelle" class="form-label">Nom du complément <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="libelle" name="libelle" required placeholder="Ex: Coca-Cola 33cl, Frites Maison...">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="type" class="form-label">Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="type" name="type" required>
+                                    <option value="" selected disabled>Choisir le type...</option>
+                                    <option value="BOISSON">🥤 Boisson</option>
+                                    <option value="FRITE">🍟 Frites</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label for="prix" class="form-label">Prix (FCFA) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="prix" name="prix" required min="0" step="50" placeholder="Ex: 500">
+                                    <span class="input-group-text bg-light">FCFA</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="image" class="form-label">Image du produit</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="image" name="image" accept="image/jpeg,image/png,image/jpg">
+                            </div>
+                            <div class="form-text mt-2">
+                                <i class="bi bi-info-circle me-1"></i> Format JPG, PNG. Max 5 MB.
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-column flex-md-row gap-3 pt-3 border-top">
+                            <button type="submit" class="btn btn-submit">
+                                <i class="bi bi-check-lg me-2"></i>Enregistrer le complément
+                            </button>
+                            <a href="{{ path('app_complement_index') }}" class="btn btn-outline-secondary btn-cancel">
+                                <i class="bi bi-x me-1"></i>Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

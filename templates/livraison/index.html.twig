@@ -1,0 +1,261 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Affecter les livraisons{% endblock %}
+{% block page_title %}Affecter les livraisons{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* Alert stylisée */
+    .dispatch-summary {
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: 16px;
+        color: #0369a1;
+    }
+
+    /* Card par zone */
+    .zone-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-bottom: 35px;
+        border: 1px solid #f1f5f9;
+    }
+
+    .zone-header {
+        background: white;
+        padding: 20px;
+        border-bottom: 2px solid #f8fafc;
+    }
+
+    .zone-title {
+        font-weight: 800;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .fee-badge {
+        background: #f1f5f9;
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #64748b;
+    }
+
+    /* Table styles */
+    .table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 15px;
+    }
+
+    .table tbody td {
+        padding: 15px;
+        vertical-align: middle;
+    }
+
+    /* Checkbox custom */
+    .form-check-input:checked {
+        background-color: #ef4444;
+        border-color: #ef4444;
+    }
+
+    /* Section Affectation */
+    .assignment-footer {
+        background: #f8fafc;
+        padding: 25px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .livreur-select {
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        padding: 12px;
+        font-weight: 600;
+    }
+
+    .btn-dispatch {
+        background: #0f172a;
+        color: white;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 700;
+        transition: 0.3s;
+        border: none;
+    }
+
+    .btn-dispatch:hover {
+        background: #ef4444;
+        transform: translateY(-2px);
+    }
+
+    .order-id {
+        font-family: monospace;
+        background: #fef2f2;
+        color: #ef4444;
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-weight: 700;
+    }
+
+    .badge-soft {
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 0.7rem;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+	<div class="row mb-4">
+		<div class="col-md-12">
+			<div class="alert dispatch-summary d-flex align-items-center p-4">
+				<div class="bg-white p-3 rounded-circle me-4 shadow-sm">
+					<i class="bi bi-truck text-primary fs-2"></i>
+				</div>
+				<div>
+					<h5 class="mb-1 fw-bold">{{ totalCommandes }} commande(s) attendent un livreur</h5>
+					<p class="mb-0 opacity-75">Optimisez vos tournées en regroupant les commandes par zone géographique.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{% if commandesParZone is empty %}
+		<div class="card border-0 shadow-sm rounded-4 py-5 text-center">
+			<div class="card-body">
+				<div class="mb-4">
+                    <img src="https://cdn-icons-png.flaticon.com/512/4436/4436481.png" style="width: 100px; opacity: 0.5;">
+                </div>
+				<h4 class="fw-bold">Mission accomplie !</h4>
+				<p class="text-muted">Toutes les livraisons ont été affectées à vos livreurs.</p>
+				<a href="{{ path('app_livraison_historique') }}" class="btn btn-dark rounded-pill px-4 mt-2">
+					<i class="bi bi-clock-history me-2"></i>Consulter l'historique
+				</a>
+			</div>
+		</div>
+	{% else %}
+		{% for zoneNom, data in commandesParZone %}
+			<div class="card zone-card">
+				<div class="zone-header d-flex justify-content-between align-items-center">
+					<div class="zone-title">
+						<i class="bi bi-geo-alt-fill text-danger fs-4"></i>
+						<span class="fs-5">{{ zoneNom }}</span>
+						<span class="badge bg-danger rounded-pill px-3">{{ data.commandes|length }}</span>
+					</div>
+					{% if data.zone %}
+						<div class="fee-badge">
+							<i class="bi bi-cash-stack me-2"></i>Livraison : {{ data.zone.prixLivraison|number_format(0, ',', ' ') }} FCFA
+						</div>
+					{% endif %}
+				</div>
+
+				<div class="card-body p-0">
+					<form method="post" action="{{ path('app_livraison_affecter') }}" id="form-zone-{{ data.zoneId ?? 0 }}">
+						<input type="hidden" name="_token" value="{{ csrf_token('affecter_livraison') }}">
+
+						<div class="table-responsive">
+							<table class="table mb-0 table-hover">
+								<thead>
+									<tr>
+										<th class="ps-4" style="width: 60px;">
+											<input type="checkbox" class="form-check-input select-all" data-zone="{{ data.zoneId ?? 0 }}">
+										</th>
+										<th>Commande</th>
+										<th>Client</th>
+										<th>Destination</th>
+										<th>Montant</th>
+										<th>Statut</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for commande in data.commandes %}
+										<tr>
+											<td class="ps-4">
+												<input type="checkbox" name="commandes[]" value="{{ commande.id }}" class="form-check-input commande-checkbox" data-zone="{{ data.zoneId ?? 0 }}">
+											</td>
+											<td>
+												<span class="order-id">#{{ commande.numeroCommande }}</span><br>
+												<small class="text-muted">{{ commande.dateCommande|date('H:i') }}</small>
+											</td>
+											<td>
+												<div class="fw-bold text-dark">{{ commande.client.prenom }} {{ commande.client.nom }}</div>
+												<small class="text-muted">{{ commande.client.tel }}</small>
+											</td>
+											<td>
+												<div class="small text-muted" title="{{ commande.adresseLivraison }}">
+                                                    <i class="bi bi-geo-alt me-1"></i>{{ commande.adresseLivraison|slice(0, 45) }}...
+                                                </div>
+											</td>
+											<td><span class="fw-bold text-dark">{{ commande.montantTotal|number_format(0, ',', ' ') }} FCFA</span></td>
+											<td>
+												{% set badges = {'VALIDEE': 'success', 'EN_PREPARATION': 'info', 'TERMINEE': 'primary'} %}
+												<span class="badge bg-{{ badges[commande.etat] ?? 'secondary' }} bg-opacity-10 text-{{ badges[commande.etat] ?? 'secondary' }} border border-{{ badges[commande.etat] ?? 'secondary' }} rounded-pill px-3">
+													{{ commande.etat|replace({'_': ' '})|lower|capitalize }}
+												</span>
+											</td>
+										</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+
+						<div class="assignment-footer">
+							<div class="row g-3 align-items-center">
+								<div class="col-md-8">
+									<div class="d-flex align-items-center">
+                                        <div class="me-3 text-muted fw-bold small text-uppercase">Livreur disponible</div>
+                                        <select name="livreur_id" id="livreur-{{ data.zoneId ?? 0 }}" class="form-select livreur-select" required>
+                                            <option value="">-- Choisir qui livrera ces colis --</option>
+                                            {% for livreur in livreurs %}
+                                                <option value="{{ livreur.id }}">
+                                                    {{ livreur.prenom }} {{ livreur.nom }} 
+                                                    {% if livreur.vehicule %}[{{ livreur.vehicule }}]{% endif %}
+                                                    {% if livreur.disponible %} (✓ Prêt){% else %} (✗ Occupé){% endif %}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+								</div>
+								<div class="col-md-4">
+									<button type="submit" class="btn-dispatch w-100 shadow-sm">
+										<i class="bi bi-send-check-fill me-2"></i>Lancer la livraison
+									</button>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		{% endfor %}
+	{% endif %}
+
+	<div class="text-center mt-5 mb-5">
+		<a href="{{ path('app_livraison_historique') }}" class="btn btn-outline-secondary rounded-pill px-4 fw-bold">
+			<i class="bi bi-clock-history me-2"></i>Voir l'historique des livraisons
+		</a>
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    // Votre logique PHP/JS conservée intacte
+    document.querySelectorAll('.select-all').forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            const zoneId = this.dataset.zone;
+            const isChecked = this.checked;
+            document.querySelectorAll(`.commande-checkbox[data-zone="${zoneId}"]`).forEach(cb => {
+                cb.checked = isChecked;
+            });
+        });
+    });
+</script>
+{% endblock %}

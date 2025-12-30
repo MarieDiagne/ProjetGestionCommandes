@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Vue d'ensemble{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .hero-banner {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-radius: 30px; padding: 45px; color: white; margin-bottom: 40px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1); position: relative; overflow: hidden;
+    }
+    .stat-card-premium {
+        background: white; border-radius: 24px; padding: 25px; border: none;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .stat-card-premium:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+    
+    .icon-box { width: 56px; height: 56px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px; }
+    .valeur-stat { font-size: 2.2rem; font-weight: 800; color: #1e293b; }
+    
+    .top-products-container { background: white; border-radius: 30px; padding: 30px; }
+    .product-row { background: #f8fafc; border-radius: 20px; padding: 15px 25px; transition: 0.3s; margin-bottom: 12px; }
+    .product-row:hover { background: white; box-shadow: 0 10px 20px rgba(0,0,0,0.05); transform: translateX(10px); }
+    
+    .rank-circle { width: 35px; height: 35px; background: #1e293b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .rank-1 { background: linear-gradient(45deg, #ffd700, #ffae00); }
+</style>
+{% endblock %}
+
+{% block body %}
+    <div class="hero-banner d-flex justify-content-between align-items-center">
+        <div>
+            <span class="badge bg-danger mb-3 px-3 py-2 rounded-pill">LIVE SESSION</span>
+            <h1 class="fw-black display-5">Bonjour, {{ app.user.prenom|capitalize }} !</h1>
+            <p class="opacity-75 fs-5">L'activité de Brasil Burger est en pleine effervescence aujourd'hui.</p>
+        </div>
+        <i class="bi bi-graph-up-arrow d-none d-lg-block" style="font-size: 5rem; opacity: 0.1;"></i>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="stat-card-premium">
+                <div class="icon-box bg-primary text-white bg-opacity-75"><i class="bi bi-lightning-charge-fill"></i></div>
+                <p class="text-muted small fw-bold text-uppercase mb-1">En cours</p>
+                <h2 class="valeur-stat">{{ statistiques.commandesEnCours|default(0) }}</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card-premium">
+                <div class="icon-box bg-success text-white bg-opacity-75"><i class="bi bi-check-all"></i></div>
+                <p class="text-muted small fw-bold text-uppercase mb-1">Terminées</p>
+                <h2 class="valeur-stat">{{ statistiques.commandesValidees|default(0) }}</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card-premium border-bottom border-danger border-5">
+                <div class="icon-box bg-danger text-white"><i class="bi bi-wallet2"></i></div>
+                <p class="text-muted small fw-bold text-uppercase mb-1">Recettes</p>
+                <h2 class="valeur-stat text-danger">{{ statistiques.recettesJournalieres|default(0)|number_format(0, ',', ' ') }}</h2>
+                <small class="fw-bold text-muted">FCFA TOTAL</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card-premium">
+                <div class="icon-box bg-dark text-white"><i class="bi bi-trash3"></i></div>
+                <p class="text-muted small fw-bold text-uppercase mb-1">Annulées</p>
+                <h2 class="valeur-stat">{{ statistiques.commandesAnnulees|default(0) }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="top-products-container shadow-sm">
+        <h3 class="fw-black mb-4"><i class="bi bi-fire text-danger me-2"></i>Produits Stars</h3>
+        {% if statistiques.produitsLesPlusVendus is defined and statistiques.produitsLesPlusVendus is not empty %}
+            {% for index, produit in statistiques.produitsLesPlusVendus %}
+                <div class="product-row d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="rank-circle {% if index == 0 %}rank-1{% endif %}">{{ index + 1 }}</div>
+                        <div>
+                            <h6 class="mb-1 fw-bold">{{ produit.libelle|default('Produit') }}</h6>
+                            <span class="badge bg-light text-dark border small">{{ produit.typeProduit|default('PIÈCE') }}</span>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-black fs-4">{{ produit.total }}</div>
+                        <small class="text-muted fw-bold" style="font-size: 0.6rem;">VENTES</small>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-center text-muted py-4">Aucune donnée de vente.</p>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier la zone{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* Fil d'Ariane stylisé */
+    .breadcrumb {
+        background: white;
+        padding: 12px 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .breadcrumb-item a { color: #64748b; text-decoration: none; font-weight: 600; }
+    .breadcrumb-item.active { color: #ef4444; font-weight: 700; }
+
+    /* Card d'édition centrée */
+    .edit-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.07);
+        overflow: hidden;
+    }
+
+    .edit-card .card-header {
+        background: #f8fafc;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 20px 30px;
+    }
+
+    .edit-card .card-body {
+        padding: 40px;
+    }
+
+    /* Styles des labels et inputs */
+    .form-label {
+        font-weight: 700;
+        color: #334155;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        padding: 12px 15px;
+        border: 2px solid #e2e8f0;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+
+    .form-control:focus {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+    }
+
+    /* Switch stylisé */
+    .form-switch .form-check-input {
+        width: 3em;
+        height: 1.5em;
+        cursor: pointer;
+    }
+    .form-switch .form-check-input:checked {
+        background-color: #10b981;
+        border-color: #10b981;
+    }
+
+    /* Boutons */
+    .btn-save {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 12px;
+        font-weight: 700;
+        transition: all 0.3s;
+    }
+    .btn-save:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        color: white;
+    }
+
+    .btn-cancel {
+        background: #f1f5f9;
+        color: #64748b;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 12px;
+        font-weight: 700;
+        transition: all 0.3s;
+    }
+    .btn-cancel:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+
+    .input-group-text {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-right: none;
+        border-radius: 12px 0 0 12px;
+        color: #64748b;
+        font-weight: 700;
+    }
+    .form-control-with-icon {
+        border-left: none;
+        border-radius: 0 12px 12px 0;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+	<nav aria-label="breadcrumb" class="mb-5">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item">
+				<a href="{{ path('app_zone_index') }}">Zones de livraison</a>
+			</li>
+			<li class="breadcrumb-item">
+				<a href="{{ path('app_zone_show', {id: zone.id}) }}">{{ zone.nom }}</a>
+			</li>
+			<li class="breadcrumb-item active">Configuration</li>
+		</ol>
+	</nav>
+
+	<div class="row justify-content-center">
+		<div class="col-lg-7">
+			<div class="card edit-card">
+				<div class="card-header">
+					<h5 class="mb-0 fw-800 text-dark">
+						<i class="bi bi-sliders2-vertical me-2 text-danger"></i>
+						Modifier les paramètres de la zone
+					</h5>
+				</div>
+				<div class="card-body">
+					<form method="post" action="{{ path('app_zone_edit', {id: zone.id}) }}">
+						<input type="hidden" name="_token" value="{{ csrf_token('edit_zone_' ~ zone.id) }}">
+
+						<div class="mb-4">
+							<label for="nom" class="form-label">
+								<i class="bi bi-tag small"></i> Nom de la zone
+								<span class="text-danger">*</span>
+							</label>
+							<input type="text" class="form-control" id="nom" name="nom" value="{{ zone.nom }}" placeholder="Ex: Zone A - Plateau" required>
+							<div class="form-text text-muted small">Ce nom sera visible lors de la prise de commande.</div>
+						</div>
+
+						<div class="mb-4">
+							<label for="prix_livraison" class="form-label">
+								<i class="bi bi-cash-stack small"></i> Tarif de livraison
+								<span class="text-danger">*</span>
+							</label>
+							<div class="input-group">
+								<span class="input-group-text">FCFA</span>
+								<input type="number" class="form-control form-control-with-icon" id="prix_livraison" name="prix_livraison" value="{{ zone.prixLivraison }}" required min="0" step="100">
+							</div>
+						</div>
+
+						<div class="mb-5 p-3 rounded-4 bg-light bg-opacity-50 border">
+							<div class="form-check form-switch d-flex align-items-center gap-3">
+								<input class="form-check-input ms-0" type="checkbox" id="actif" name="actif" value="1" {% if zone.actif %} checked {% endif %}>
+								<label class="form-check-label fw-bold text-dark mb-0" for="actif">
+									Rendre cette zone active pour les livraisons
+								</label>
+							</div>
+							<div class="small text-muted mt-2 ps-5">Si décochée, cette zone ne pourra plus être sélectionnée pour de nouvelles commandes.</div>
+						</div>
+
+						<div class="d-flex flex-column flex-sm-row gap-3 mt-5">
+							<button type="submit" class="btn btn-save flex-grow-1">
+								<i class="bi bi-cloud-check me-2"></i>Mettre à jour la zone
+							</button>
+							<a href="{{ path('app_zone_show', {id: zone.id}) }}" class="btn btn-cancel">
+								Annuler les modifications
+							</a>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

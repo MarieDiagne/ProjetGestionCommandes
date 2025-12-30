@@ -1,0 +1,225 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des zones{% endblock %}
+{% block page_title %}Zones de Livraison{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* Bouton d'ajout flottant ou stylisé */
+    .btn-create-zone {
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 700;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+    }
+    .btn-create-zone:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    /* Card Zone Premium */
+    .zone-card {
+        border: none;
+        border-radius: 20px;
+        background: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.03);
+        border: 1px solid #f1f5f9;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .zone-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 30px rgba(0,0,0,0.08);
+    }
+
+    .zone-card.inactive {
+        opacity: 0.7;
+        filter: grayscale(0.5);
+    }
+
+    .zone-header {
+        padding: 20px;
+        border-bottom: 1px solid #f8fafc;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .zone-title {
+        font-weight: 800;
+        color: #0f172a;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .status-pill {
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        padding: 5px 12px;
+        border-radius: 50px;
+        letter-spacing: 0.5px;
+    }
+
+    .status-active { background: #dcfce7; color: #166534; }
+    .status-inactive { background: #f1f5f9; color: #475569; }
+
+    /* Stats Section */
+    .price-tag {
+        background: #fef2f2;
+        color: #ef4444;
+        padding: 15px;
+        border-radius: 15px;
+        text-align: center;
+    }
+
+    .count-tag {
+        background: #f0f9ff;
+        color: #0369a1;
+        padding: 15px;
+        border-radius: 15px;
+        text-align: center;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        opacity: 0.7;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    /* Quartiers Pill */
+    .quartier-badge {
+        background: #f8fafc;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .btn-details {
+        background: #0f172a;
+        color: white;
+        border-radius: 12px;
+        font-weight: 700;
+        padding: 10px;
+        border: none;
+        transition: 0.3s;
+    }
+
+    .btn-details:hover {
+        background: #ef4444;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+	<div class="row mb-5">
+		<div class="col-md-12 d-flex justify-content-between align-items-center">
+			<div>
+                <h4 class="fw-800 mb-0">Réseau de livraison</h4>
+                <p class="text-muted small mb-0">Gérez vos tarifs et zones de couverture</p>
+            </div>
+			<a href="{{ path('app_zone_new') }}" class="btn-create-zone">
+				<i class="bi bi-plus-lg me-2"></i>Nouvelle zone
+			</a>
+		</div>
+	</div>
+
+	<div class="row">
+		{% if zones is empty %}
+			<div class="col-md-12">
+				<div class="card border-0 shadow-sm rounded-4 py-5 text-center">
+					<div class="card-body">
+						<div class="mb-4">
+                            <i class="bi bi-map text-light" style="font-size: 5rem;"></i>
+                        </div>
+						<h4 class="fw-bold">Aucune zone configurée</h4>
+						<p class="text-muted">Définissez vos quartiers et tarifs pour activer les livraisons.</p>
+						<a href="{{ path('app_zone_new') }}" class="btn btn-danger rounded-pill px-4 mt-2">
+							<i class="bi bi-plus-circle me-2"></i>Créer ma première zone
+						</a>
+					</div>
+				</div>
+			</div>
+		{% else %}
+			{% for zone in zones %}
+				<div class="col-lg-6 col-xl-4 mb-4">
+					<div class="card h-100 zone-card {% if not zone.actif %}inactive{% endif %}">
+						<div class="zone-header">
+							<div class="zone-title">
+								<i class="bi bi-geo-alt text-danger"></i>
+								{{ zone.nom }}
+							</div>
+							<span class="status-pill {% if zone.actif %}status-active{% else %}status-inactive{% endif %}">
+								{{ zone.actif ? 'Active' : 'Inactive' }}
+							</span>
+						</div>
+						<div class="card-body p-4">
+							<div class="row g-3 mb-4">
+								<div class="col-6">
+									<div class="price-tag">
+										<span class="stat-label">Tarif</span>
+										<span class="fw-800 fs-5">{{ zone.prixLivraison|number_format(0, ',', ' ') }}</span>
+										<small>CFA</small>
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="count-tag">
+										<span class="stat-label">Couverture</span>
+										<span class="fw-800 fs-5">{{ zone.quartiers|length }}</span>
+										<small>Secteurs</small>
+									</div>
+								</div>
+							</div>
+
+							{% if zone.quartiers is not empty %}
+								<div class="mb-4">
+									<p class="stat-label mb-2">Points desservis :</p>
+									<div class="d-flex flex-wrap gap-2">
+										{% for quartier in zone.quartiers|slice(0, 4) %}
+											<span class="quartier-badge">{{ quartier.nom }}</span>
+										{% endfor %}
+										{% if zone.quartiers|length > 4 %}
+											<span class="quartier-badge bg-white text-danger border-danger border-opacity-25">+{{ zone.quartiers|length - 4 }}</span>
+										{% endif %}
+									</div>
+								</div>
+							{% else %}
+                                <div class="mb-4 py-2 border rounded-3 text-center bg-light">
+                                    <span class="text-muted small">Aucun quartier lié</span>
+                                </div>
+                            {% endif %}
+
+							<div class="d-grid mt-auto">
+								<a href="{{ path('app_zone_show', {id: zone.id}) }}" class="btn btn-details shadow-sm">
+									<i class="bi bi-gear-fill me-2 small"></i>Gérer la zone
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			{% endfor %}
+		{% endif %}
+	</div>
+
+    <div class="text-center mt-4 mb-5">
+        <p class="text-muted small">Besoin de modifier la liste globale des quartiers ? 
+            <a href="#" class="text-danger fw-bold text-decoration-none">Accéder aux paramètres</a>
+        </p>
+    </div>
+{% endblock %}

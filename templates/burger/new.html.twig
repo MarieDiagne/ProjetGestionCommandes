@@ -1,0 +1,204 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau burger{% endblock %}
+{% block page_title %}Créer un nouveau burger{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* Configuration du design Premium */
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --primary-gradient: linear-gradient(135deg, #ff4757, #ff6b81);
+        --dark-accent: #2d3436;
+    }
+
+    body {
+        background: #f0f2f5; /* Fond légèrement grisé pour faire ressortir la carte */
+    }
+
+    /* Animation d'entrée */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .row.justify-content-center {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    /* Carte stylisée */
+    .card {
+        border: none;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.06);
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.8);
+    }
+
+    .card-header {
+        background: var(--dark-accent) !important;
+        color: white;
+        padding: 2rem !important;
+        border: none;
+        text-align: center;
+    }
+
+    .card-header h5 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+
+    /* Champs de saisie modernes */
+    .form-label {
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        color: #b2bec3;
+        margin-left: 5px;
+        margin-bottom: 8px;
+        letter-spacing: 1px;
+    }
+
+    .form-control, .form-select {
+        border-radius: 16px;
+        padding: 0.9rem 1.2rem;
+        border: 2px solid #edf2f7;
+        background-color: #f8fafc;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 1rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        background-color: #fff;
+        border-color: #ff4757;
+        box-shadow: 0 10px 20px rgba(255, 71, 87, 0.1);
+        transform: translateY(-2px);
+    }
+
+    /* Boutons stylisés */
+    .btn-danger {
+        background: var(--primary-gradient);
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 18px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 8px 25px rgba(255, 71, 87, 0.3);
+        transition: all 0.4s;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(255, 71, 87, 0.4);
+        filter: brightness(1.1);
+    }
+
+    .btn-outline-secondary {
+        border: 2px solid #dfe6e9;
+        color: #636e72;
+        padding: 1rem 2rem;
+        border-radius: 18px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-outline-secondary:hover {
+        background: #f1f2f6;
+        color: #2d3436;
+        border-color: #b2bec3;
+    }
+
+    /* Zone upload image */
+    input[type="file"] {
+        padding: 0.6rem;
+        background: white;
+        cursor: pointer;
+    }
+
+    /* Breadcrumb plus élégant */
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+    }
+    .breadcrumb-item a { color: #ff4757; font-weight: 600; text-decoration: none; }
+    .breadcrumb-item.active { color: #b2bec3; }
+</style>
+{% endblock %}
+
+{% block body %}
+	<nav aria-label="breadcrumb" class="mb-5">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item">
+				<a href="{{ path('app_burger_index') }}">Catalogue</a>
+			</li>
+			<li class="breadcrumb-item active">Nouvelle Création</li>
+		</ol>
+	</nav>
+
+	<div class="row justify-content-center mb-5">
+		<div class="col-md-8 col-lg-6">
+			<div class="card">
+				<div class="card-header">
+					<h5 class="mb-0">
+						<i class="bi bi-fire me-2"></i>
+						NOUVEAU BURGER
+					</h5>
+				</div>
+				<div class="card-body p-4 p-md-5">
+					<form method="post" action="{{ path('app_burger_new') }}" enctype="multipart/form-data">
+						<input type="hidden" name="_token" value="{{ csrf_token('create_burger') }}">
+
+						<div class="mb-4">
+							<label for="libelle" class="form-label">Nom de la recette
+								<span class="text-danger">*</span>
+							</label>
+							<input type="text" class="form-control" id="libelle" name="libelle" required placeholder="Ex: Brasil Burger Classic">
+						</div>
+
+						<div class="mb-4">
+							<label for="description" class="form-label">Composition & Saveurs</label>
+							<textarea class="form-control" id="description" name="description" rows="3" placeholder="Décrivez les ingrédients..."></textarea>
+						</div>
+
+						<div class="row">
+							<div class="col-md-6 mb-4">
+								<label for="prix" class="form-label">Tarif (FCFA)
+									<span class="text-danger">*</span>
+								</label>
+								<input type="number" class="form-control" id="prix" name="prix" required min="0" step="100" placeholder="0">
+							</div>
+
+							<div class="col-md-6 mb-4">
+								<label for="categorie_id" class="form-label">Catégorie</label>
+								<select class="form-select" id="categorie_id" name="categorie_id">
+									<option value="">-- Sélectionner --</option>
+									{% for categorie in categories %}
+										<option value="{{ categorie.id }}">{{ categorie.nom }}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+
+						<div class="mb-5">
+							<label for="image" class="form-label">Photo du burger</label>
+							<input type="file" class="form-control" id="image" name="image" accept="image/jpeg,image/png,image/jpg">
+							<small class="form-text text-muted ps-2 mt-2 d-block">Fichiers autorisés : JPG, PNG (Max 5 Mo)</small>
+						</div>
+
+						<div class="d-grid gap-3 d-md-flex justify-content-md-center">
+							<button type="submit" class="btn btn-danger px-5">
+								<i class="bi bi-check-lg me-2"></i>
+								Valider la création
+							</button>
+							<a href="{{ path('app_burger_index') }}" class="btn btn-outline-secondary px-5">
+								Annuler
+							</a>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

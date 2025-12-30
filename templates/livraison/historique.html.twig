@@ -1,0 +1,204 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historique des livraisons{% endblock %}
+{% block page_title %}Historique des livraisons{% endblock %}
+
+{% block stylesheets %}
+    {# Style DataTables pour la cohérence #}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <style>
+        /* Table & Container */
+        .table-card {
+            background: white;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .table thead th {
+            background: #f8fafc;
+            border-bottom: 2px solid #f1f5f9;
+            color: #475569;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            padding: 1.2rem 1rem;
+        }
+
+        .table tbody td {
+            padding: 1.2rem 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .order-id {
+            font-family: 'JetBrains Mono', monospace;
+            color: #ef4444;
+            font-weight: 700;
+            background: #fef2f2;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        /* Soft Badges */
+        .badge-soft { 
+            padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.75rem; 
+            display: inline-flex; align-items: center; 
+        }
+        .bg-soft-info { background-color: #e0f2fe; color: #0369a1; }
+        .bg-soft-success { background-color: #dcfce7; color: #166534; }
+        .bg-soft-secondary { background-color: #f1f5f9; color: #475569; }
+
+        /* Customization DataTables */
+        .dataTables_info { padding: 1.5rem; font-size: 0.85rem; color: #64748b; }
+        .dataTables_paginate { padding: 1.5rem; }
+        .page-link { border-radius: 8px !important; margin: 0 3px; border: none; background: #f1f5f9; color: #475569; }
+        .page-item.active .page-link { background-color: #0f172a !important; color: white !important; }
+
+        /* Livreurs stylisés */
+        .livreur-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            background: #f0f7ff;
+            color: #0061d5;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+	<nav aria-label="breadcrumb" class="mb-4">
+		<ol class="breadcrumb bg-white p-3 rounded-4 shadow-sm">
+			<li class="breadcrumb-item"><a href="{{ path('app_livraison_index') }}" class="text-decoration-none text-muted">Livraisons</a></li>
+			<li class="breadcrumb-item active fw-bold text-danger">Historique global</li>
+		</ol>
+	</nav>
+
+	<div class="table-card">
+		<div class="px-4 py-4 border-bottom d-flex justify-content-between align-items-center bg-white">
+			<h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-clock-history me-2 text-danger"></i>
+                Flux des livraisons ({{ commandes|length }})
+            </h5>
+            <div class="w-25">
+                <input type="text" id="customSearch" class="form-control rounded-3" placeholder="Rechercher une livraison...">
+            </div>
+		</div>
+		
+		<div class="table-responsive">
+            <table class="table mb-0" id="historyTable">
+                <thead>
+                    <tr>
+                        <th>N° Commande</th>
+                        <th>Date & Heure</th>
+                        <th>Client</th>
+                        <th>Lieu de livraison</th>
+                        <th>Zone</th>
+                        <th>Livreur</th>
+                        <th>Montant</th>
+                        <th>État</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for commande in commandes %}
+                        <tr>
+                            <td><span class="order-id">#{{ commande.numeroCommande }}</span></td>
+                            <td>
+                                <div class="fw-bold">{{ commande.dateCommande|date('d/m/Y') }}</div>
+                                <small class="text-muted">{{ commande.dateCommande|date('H:i') }}</small>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ commande.client.prenom }} {{ commande.client.nom }}</div>
+                                <small class="text-muted">{{ commande.client.tel }}</small>
+                            </td>
+                            <td>
+                                <small class="text-muted fw-medium" title="{{ commande.adresseLivraison }}">
+                                    {{ commande.adresseLivraison|slice(0, 30) }}{% if commande.adresseLivraison|length > 30 %}...{% endif %}
+                                </small>
+                            </td>
+                            <td>
+                                {% if commande.zone %}
+                                    <span class="badge bg-light text-dark border rounded-pill">{{ commande.zone.nom }}</span>
+                                {% else %}
+                                    <span class="text-muted small">Non définie</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if commande.livreur %}
+                                    <div class="livreur-pill">
+                                        <i class="bi bi-person-circle me-2"></i>
+                                        {{ commande.livreur.prenom }} {{ commande.livreur.nom }}
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted italic small">Non affecté</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong class="text-dark">{{ commande.montantTotal|number_format(0, ',', ' ') }} <small>FCFA</small></strong>
+                            </td>
+                            <td>
+                                {% set badgeStyle = { 'EN_LIVRAISON': 'info', 'LIVREE': 'success' } %}
+                                <span class="badge-soft bg-soft-{{ badgeStyle[commande.etat] ?? 'secondary' }}">
+                                    <i class="bi bi-dot fs-4"></i>{{ commande.etat|replace({'_': ' '}) }}
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="d-flex justify-content-end gap-1">
+                                    <a href="{{ path('app_commande_show', {id: commande.id}) }}" class="btn btn-light btn-sm rounded-3 border" title="Voir les détails">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
+                                    {% if commande.etat == 'EN_LIVRAISON' %}
+                                        <form method="post" action="{{ path('app_livraison_retirer', {id: commande.id}) }}" class="d-inline" onsubmit="return confirm('Retirer le livreur de cette commande ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('retirer_livreur_' ~ commande.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-3" title="Annuler l'affectation">
+                                                <i class="bi bi-person-x"></i>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+		</div>
+	</div>
+
+	<div class="mt-4">
+		<a href="{{ path('app_livraison_index') }}" class="btn btn-dark rounded-4 px-4 py-2">
+			<i class="bi bi-arrow-left me-2"></i>
+			Retour aux livraisons en cours
+		</a>
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var table = $('#historyTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json"
+                },
+                "pageLength": 7, // Garde la cohérence avec ta page commande
+                "order": [[1, "desc"]], // Plus récent d'abord
+                "dom": 'rtip', // Table, Infos, Pagination
+            });
+
+            $('#customSearch').keyup(function(){
+                table.search($(this).val()).draw() ;
+            })
+        });
+    </script>
+{% endblock %}

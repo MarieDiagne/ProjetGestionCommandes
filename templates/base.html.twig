@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Brasil Burger | Admin{% endblock %}</title>
+
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+        <style>
+            :root {
+                --sidebar-width: 280px;
+                --header-height: 70px;
+                --primary-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+                --accent-color: #ff4757;
+                --sidebar-text: #94a3b8;
+            }
+
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: #f1f5f9;
+                color: #1e293b;
+                margin: 0;
+            }
+
+            /* Sidebar */
+            .sidebar {
+                position: fixed; top: 0; left: 0; height: 100vh; width: var(--sidebar-width);
+                background: var(--primary-gradient); color: white; z-index: 1000; padding: 1.5rem;
+            }
+
+            .sidebar-header { padding-bottom: 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 1.5rem; }
+
+            .logo-box { background: var(--accent-color); width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 8px 15px rgba(255, 71, 87, 0.3); }
+
+            .sidebar-menu { display: flex; flex-direction: column; gap: 0.3rem; }
+
+            .menu-label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 1.2px; margin: 1.2rem 0 0.5rem 1rem; }
+
+            .sidebar-menu a { display: flex; align-items: center; padding: 0.7rem 1.2rem; color: var(--sidebar-text); text-decoration: none; border-radius: 12px; transition: 0.2s; font-weight: 500; }
+
+            .sidebar-menu a i { font-size: 1.2rem; margin-right: 12px; }
+
+            .sidebar-menu a:hover { background: rgba(255, 255, 255, 0.05); color: white; }
+
+            .sidebar-menu a.active { background: rgba(255, 71, 87, 0.1); color: var(--accent-color); font-weight: 700; }
+
+            /* Main Container */
+            .main-header { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: var(--header-height); background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; z-index: 999; border-bottom: 1px solid #e2e8f0; }
+
+            .main-content { margin-left: var(--sidebar-width); margin-top: var(--header-height); padding: 2.5rem; min-height: calc(100vh - var(--header-height)); }
+
+            .user-pill { background: white; padding: 6px 15px; border-radius: 50px; border: 1px solid #e2e8f0; }
+        </style>
+        {% block stylesheets %}{% endblock %}
+    </head>
+    <body>
+        <div class="sidebar">
+            <div class="sidebar-header d-flex align-items-center gap-3">
+                <div class="logo-box">🍔</div>
+                <div>
+                    <h6 class="mb-0 fw-bold text-white">BRASIL BURGER</h6>
+                    <span class="text-success small fw-bold" style="font-size: 0.65rem;">● ADMIN</span>
+                </div>
+            </div>
+
+            <div class="sidebar-menu">
+                <a href="{{ path('app_dashboard') }}" class="{% if app.request.get('_route') == 'app_dashboard' %}active{% endif %}">
+                    <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                </a>
+
+                <div class="menu-label">Catalogue</div>
+                <a href="{{ path('app_burger_index') }}" class="{% if app.request.get('_route') starts with 'app_burger' %}active{% endif %}">
+                    <i class="bi bi-stack"></i> Burgers
+                </a>
+                <a href="{{ path('app_menu_index') }}" class="{% if app.request.get('_route') starts with 'app_menu' %}active{% endif %}">
+                    <i class="bi bi-collection-play"></i> Menus
+                </a>
+                <a href="{{ path('app_complement_index') }}" class="{% if app.request.get('_route') starts with 'app_complement' %}active{% endif %}">
+                    <i class="bi bi-plus-square-dotted"></i> Compléments
+                </a>
+
+                <div class="menu-label">Activité</div>
+                <a href="{{ path('app_commande_index') }}" class="{% if app.request.get('_route') starts with 'app_commande' %}active{% endif %}">
+                    <i class="bi bi-bag-check"></i> Commandes
+                </a>
+
+                <div class="menu-label">Logistique</div>
+                <a href="{{ path('app_livraison_index') }}" class="{% if app.request.get('_route') starts with 'app_livraison' %}active{% endif %}">
+                    <i class="bi bi-truck"></i> Livraisons
+                </a>
+                <a href="{{ path('app_zone_index') }}" class="{% if app.request.get('_route') starts with 'app_zone' %}active{% endif %}">
+                    <i class="bi bi-geo-alt"></i> Zones
+                </a>
+				<div class="menu-label">Session</div>
+				<a href="{{ path('app_logout') }}" class="text-danger">
+					<i class="bi bi-box-arrow-right"></i> Déconnexion
+				</a>
+            </div>
+        </div>
+
+        <div class="main-header px-4">
+            <h4 class="fw-800 mb-0">{% block page_title %}Dashboard{% endblock %}</h4>
+            <div class="user-pill d-flex align-items-center gap-3">
+                <div class="text-end d-none d-sm-block">
+                    <div class="fw-bold small">{{ app.user.prenom }} {{ app.user.nom }}</div>
+                    <div class="text-muted" style="font-size: 0.7rem;">Manager</div>
+                </div>
+                <img src="https://ui-avatars.com/api/?name={{ app.user.prenom }}+{{ app.user.nom }}&background=ff4757&color=fff" class="rounded-circle" width="35">
+            </div>
+        </div>
+
+        <div class="main-content">
+            {% block body %}{% endblock %}
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        {% block javascripts %}{% endblock %}
+    </body>
+</html>

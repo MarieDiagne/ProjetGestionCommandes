@@ -1,0 +1,233 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des commandes{% endblock %}
+{% block page_title %}Gestion des commandes{% endblock %}
+
+{% block stylesheets %}
+    {# Style DataTables pour Bootstrap 5 #}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <style>
+        /* Design des filtres */
+        .filter-section {
+            background: white;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .form-label { font-weight: 600; font-size: 0.85rem; color: #64748b; margin-bottom: 0.5rem; }
+        .form-select, .form-control { border-radius: 10px; border: 1px solid #e2e8f0; padding: 0.6rem 1rem; font-size: 0.9rem; }
+
+        /* Table & Container */
+        .table-card {
+            background: white;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 50px;
+        }
+
+        .table thead th {
+            background: #f8fafc;
+            border-bottom: 2px solid #f1f5f9;
+            color: #475569;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            padding: 1.2rem 1rem;
+        }
+
+        .table tbody td {
+            padding: 1.2rem 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .order-id {
+            font-family: 'JetBrains Mono', 'Monaco', monospace;
+            color: #ef4444;
+            font-weight: 700;
+            background: #fef2f2;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        /* Soft Badges stylisés */
+        .badge-soft { 
+            padding: 6px 12px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 0.75rem; 
+            display: inline-flex; 
+            align-items: center; 
+        }
+        .bg-soft-warning { background-color: #fef3c7; color: #92400e; }
+        .bg-soft-success { background-color: #dcfce7; color: #166534; }
+        .bg-soft-info { background-color: #e0f2fe; color: #0369a1; }
+        .bg-soft-danger { background-color: #fee2e2; color: #991b1b; }
+        .bg-soft-primary { background-color: #e0e7ff; color: #3730a3; }
+
+        /* Customization Pagination & Recherche */
+        .dataTables_wrapper .dataTables_filter { display: none; }
+        .dataTables_info { padding: 1.5rem; font-size: 0.85rem; color: #64748b; }
+        .dataTables_paginate { padding: 1.5rem; }
+        
+        .page-item.active .page-link { 
+            background-color: #0f172a !important; 
+            border-color: #0f172a !important; 
+            color: white !important;
+        }
+        .page-link { 
+            color: #475569; 
+            border-radius: 8px !important; 
+            margin: 0 3px; 
+            border: none; 
+            background: #f1f5f9;
+            transition: 0.2s;
+        }
+        .page-link:hover { background: #e2e8f0; }
+        
+        #customSearch {
+            transition: all 0.3s;
+            border: 1px solid #e2e8f0;
+        }
+        #customSearch:focus {
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+            border-color: #0f172a;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+	<div class="row mb-5">
+		<div class="col-md-12">
+			<div class="card filter-section">
+				<div class="card-body p-4">
+					<form method="get" action="{{ path('app_commande_index') }}">
+						<div class="row g-4">
+							<div class="col-md-3">
+								<label for="etat" class="form-label">Filtrer par Statut</label>
+								<select name="etat" id="etat" class="form-select">
+									<option value="">Tous les états</option>
+									{% for value, label in etats %}
+										<option value="{{ value }}" {% if filtres.etat == value %} selected {% endif %}>{{ label }}</option>
+									{% endfor %}
+								</select>
+							</div>
+							<div class="col-md-3">
+								<label for="date" class="form-label">Filtrer par Date</label>
+								<input type="date" name="date" id="date" class="form-control" value="{{ filtres.date }}">
+							</div>
+							<div class="col-md-4">
+								<label for="client" class="form-label">Filtrer par Client</label>
+								<select name="client" id="client" class="form-select">
+									<option value="">Sélectionner un client</option>
+									{% for client in clients %}
+										<option value="{{ client.id }}" {% if filtres.client == client.id %} selected {% endif %}>{{ client.prenom }} {{ client.nom }}</option>
+									{% endfor %}
+								</select>
+							</div>
+							<div class="col-md-2 d-flex align-items-end">
+								<button type="submit" class="btn btn-dark w-100 rounded-3 py-2 fw-bold">
+									<i class="bi bi-funnel-fill me-2"></i>Filtrer
+								</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="table-card">
+		<div class="px-4 py-4 border-bottom d-flex justify-content-between align-items-center bg-white">
+			<h5 class="mb-0 fw-bold text-dark">Journal des Commandes</h5>
+            <div class="position-relative w-25">
+                <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                <input type="text" id="customSearch" class="form-control ps-5" placeholder="Recherche rapide...">
+            </div>
+		</div>
+		
+		<div class="table-responsive">
+			<table class="table mb-0" id="commandesTable">
+				<thead>
+					<tr>
+						<th>N° Commande</th>
+						<th>Date & Heure</th>
+						<th>Client</th>
+						<th>Montant Total</th>
+						<th>Mode</th>
+						<th>Statut actuel</th>
+						<th class="text-end pe-4">Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for commande in commandes %}
+						<tr>
+							<td><span class="order-id">#{{ commande.numeroCommande }}</span></td>
+							<td>
+								<div class="fw-bold">{{ commande.dateCommande|date('d/m/Y') }}</div>
+								<small class="text-muted">{{ commande.dateCommande|date('H:i') }}</small>
+							</td>
+							<td>
+								<div class="fw-bold text-dark">{{ commande.client.prenom }} {{ commande.client.nom }}</div>
+								<div class="text-muted small"><i class="bi bi-phone me-1"></i>{{ commande.client.tel }}</div>
+							</td>
+							<td><strong class="text-dark">{{ commande.montantTotal|number_format(0, ',', ' ') }} <small>FCFA</small></strong></td>
+							<td>
+								{% if commande.modeConsommation == 'SUR_PLACE' %}
+									<span class="badge bg-info-subtle text-info rounded-pill px-3">Sur place</span>
+								{% elseif commande.modeConsommation == 'A_EMPORTER' %}
+									<span class="badge bg-warning-subtle text-warning rounded-pill px-3">À emporter</span>
+								{% else %}
+									<span class="badge bg-primary-subtle text-primary rounded-pill px-3">Livraison</span>
+								{% endif %}
+							</td>
+							<td>
+								{% set softBadge = {
+									'EN_ATTENTE': 'warning', 'VALIDEE': 'success', 'EN_PREPARATION': 'info',
+									'TERMINEE': 'primary', 'EN_LIVRAISON': 'info', 'LIVREE': 'success', 'ANNULEE': 'danger'
+								} %}
+								<span class="badge-soft bg-soft-{{ softBadge[commande.etat] ?? 'secondary' }}">
+									<i class="bi bi-dot fs-4"></i>{{ commande.etat|replace({'_': ' '}) }}
+								</span>
+							</td>
+							<td class="text-end pe-4">
+								<a href="{{ path('app_commande_show', {id: commande.id}) }}" class="btn btn-light btn-sm rounded-3 py-2 px-3 border">
+									<i class="bi bi-eye-fill me-1"></i> Voir
+								</a>
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+    {# Scripts DataTables #}
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var table = $('#commandesTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json"
+                },
+                "pageLength": 7, // Limite à 7 items par page
+                "order": [[1, "desc"]], 
+                "dom": 'rtip', 
+            });
+
+            // Recherche personnalisée liée à l'input
+            $('#customSearch').keyup(function(){
+                table.search($(this).val()).draw() ;
+            })
+        });
+    </script>
+{% endblock %}
